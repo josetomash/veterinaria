@@ -19,4 +19,16 @@ class Persona:
 
     @rut.setter
     def rut(self,):
+        #añadir una funcion la cual filtre los datos de entrada de los ruts !!
+        pass
+    
+
+    #filtro de telefono
+    @property
+    def telefono(self)-> str:
+        return self.__telefono
+
+    @telefono.setter
+    def telefono(self, telefono:str):
+        # Lógica para filtrar el teléfono
         pass
