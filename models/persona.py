@@ -22,8 +22,6 @@ class Persona:
         #añadir una funcion la cual filtre los datos de entrada de los ruts !!
         pass
 
-    print("hola")
-    # COMENTARIOOOOO
 
     #filtro de telefono
     @property
