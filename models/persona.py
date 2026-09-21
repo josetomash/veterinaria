@@ -23,6 +23,7 @@ class Persona:
         pass
 
     print("hola")
+    # COMENTARIOOOOO
 
     #filtro de telefono
     @property
