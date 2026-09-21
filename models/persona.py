@@ -21,7 +21,8 @@ class Persona:
     def rut(self,):
         #añadir una funcion la cual filtre los datos de entrada de los ruts !!
         pass
-    
+
+    print("hola")
 
     #filtro de telefono
     @property
