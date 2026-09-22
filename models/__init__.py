@@ -7,7 +7,7 @@ from especie import Especie
 
 from mascota import Mascota
 
-from medicamento import Medicamentos
+from medicamento import Medicamento
 
 from persona import Persona
 
