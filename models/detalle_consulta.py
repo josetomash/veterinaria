@@ -1,4 +1,4 @@
-class Detalle_consulta:
+class DetalleConsulta:
     def __init__(self, id_detalle:int, diagnostico:str, tratamiento:str):
 
         #Atributos 

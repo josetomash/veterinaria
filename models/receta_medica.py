@@ -1,4 +1,4 @@
-class Receta_medica:
+class RecetaMedica:
     def __init__(self, id_receta:int, cantidad:int, instrucciones:str):
 
         #Atributos 
