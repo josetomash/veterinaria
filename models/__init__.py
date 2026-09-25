@@ -7,6 +7,7 @@ from persona import Persona
 from propietario import Propietario
 from receta_medica import RecetaMedica
 from veterinario import Veterinario
+from .especialidad import Especialidad 
 
 __all__ = [
     "Consulta",
@@ -17,5 +18,6 @@ __all__ = [
     "Persona",
     "Propietario",
     "RecetaMedica",
-    "Veterinario"
+    "Veterinario",
+    "Especialidad",
 ]

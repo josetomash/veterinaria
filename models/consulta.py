@@ -1,28 +1,25 @@
-from datetime import date 
-#Se importa el tipo de variable 'date' para las fechas
+from datetime import date
+
+FECHA_MINIMA_CONSULTA = date(2000, 1, 1)
+
 
 class Consulta:
-    def __init__(self, id_consulta:int, motivo:str, fecha_consulta:date):
-
-        #Atributos 
+    def __init__(self, id_consulta: int, motivo: str, fecha_consulta: date):
         self.id_consulta = id_consulta
-        self.motivo= motivo
-
-        #Atributos privados
+        self.motivo = motivo
         self.__fecha_consulta = None
         self.__fecha_consulta = fecha_consulta
 
-    #filtro de fecha
     @property
-    def fecha_consulta(self)-> date:
+    def fecha_consulta(self) -> date:
         return self.__fecha_consulta
 
     @fecha_consulta.setter
-    def fecha_consulta(self, nueva_fecha:date):
+    def fecha_consulta(self, nueva_fecha: date):
         if not isinstance(nueva_fecha, date):
-            raise TypeError(f"Usted debe de ingresar una fecha valida.")
+            raise TypeError("Usted debe de ingresar una fecha válida.")
         if nueva_fecha > date.today():
-            raise ValueError(f"Fecha invalida. La fecha no puede ser mayor a la fecha actual. fecha recibida: {nueva_fecha}")
-        if nueva_fecha < date(2000, 1, 1):
-            raise ValueError(f"Fecha invalida. La fecha no puede ser menor a 01/01/200. fecha recibida: {nueva_fecha}")
+            raise ValueError(f"Fecha inválida. La fecha no puede ser mayor a la fecha actual. Fecha recibida: {nueva_fecha}")
+        if nueva_fecha < FECHA_MINIMA_CONSULTA:
+            raise ValueError(f"Fecha inválida. La fecha no puede ser menor a {FECHA_MINIMA_CONSULTA.strftime('%d/%m/%Y')}. Fecha recibida: {nueva_fecha}")
         self.__fecha_consulta = nueva_fecha
