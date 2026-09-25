@@ -1,8 +1,7 @@
 import sqlite3
-from models.especialidad import Especialidad
+from models.especie import Especie
 
-
-class EspecialidadDAO:
+class EspecieDAO:
     def __init__(self, ruta_db: str = "database/clinica_veterinaria.db"):
         self.ruta_db = ruta_db
         self._create_table()
@@ -11,19 +10,19 @@ class EspecialidadDAO:
         with sqlite3.connect(self.ruta_db) as conn:
             cursor = conn.cursor()
             cursor.execute('''
-                CREATE TABLE IF NOT EXISTS especialidades (
-                    id_especialidad INTEGER PRIMARY KEY AUTOINCREMENT,
+                CREATE TABLE IF NOT EXISTS especies (
+                    id_especie INTEGER PRIMARY KEY AUTOINCREMENT,
                     nombre TEXT NOT NULL UNIQUE
                 )
             ''')
             conn.commit()
 
-    def insertar(self, especialidad: Especialidad) -> None:
+    def insertar(self, especie: Especie) -> None:
         query = """
-            INSERT INTO especialidades (nombre)
+            INSERT INTO especies (nombre)
             VALUES (?)
         """
-        nombre_limpio = especialidad.value.strip()
+        nombre_limpio = especie.value.strip()
 
         with sqlite3.connect(self.ruta_db) as conn:
             cursor = conn.cursor()
