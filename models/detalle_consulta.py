@@ -51,3 +51,7 @@ class DetalleConsulta:
             f"  - Cantidad: {self._receta.cantidad_mg}\n"
             f"  - Indicaciones: {self._receta.instrucciones}"
         )
+    
+receta = RecetaMedica(1,'amoxixilina',500,'tomar 100 veces al dia')
+mi_consulta = DetalleConsulta(1,'hola','cd',receta)
+print(mi_consulta)
