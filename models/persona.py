@@ -19,8 +19,8 @@ class Persona:
 
     @rut.setter
     def rut(self,rut_new:str):
-        rut_original = rut_new
-        rut_new = rut_new.replace(".", "").replace("-", "").upper()
+        rut_original = rut_new.upper().strip()
+        rut_new = rut_new.replace(".", "").replace("-", "").upper().strip()
         if len(rut_new) < 8 or len(rut_new) > 9:
             raise ValueError("cantidad de caracteres imposible, verifique bien el rut")
         cuerpo = rut_new[:1]
