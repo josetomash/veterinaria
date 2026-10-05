@@ -1,17 +1,50 @@
-from persona import Persona
-from mascota import Mascota
+from .persona import Persona
+from .mascota import Mascota
 
 
 class Propietario(Persona):
-    def __init__(self, id_persona: int, nombre: str, rut: str, telefono: str, id_propietario: int, email: str, nombre_email: str, mascota: Mascota):
-        super().__init__(id_persona, nombre, rut, telefono)
+    def __init__(
+        self, 
+        nombre: str, 
+        rut: str, 
+        telefono: str, 
+        id_propietario: int, 
+        email: str, 
+        mascota: Mascota
+    ):
+        super().__init__(nombre, rut, telefono)
         self.id_propietario = id_propietario
         self.email = email
-        self.nombre_email = nombre_email
-        self._mascota = mascota
+        self.mascota = mascota
 
     @property
-    def mascota(self):
+    def id_propietario(self) -> int:
+        return self._id_propietario
+
+    @id_propietario.setter
+    def id_propietario(self, nuevo_id: int):
+        if not isinstance(nuevo_id, int) or isinstance(nuevo_id, bool):
+            raise TypeError("El ID del propietario debe ser un número entero.")
+        if nuevo_id <= 0:
+            raise ValueError("El ID del propietario debe ser un número positivo.")
+        self._id_propietario = nuevo_id
+
+    @property
+    def email(self) -> str:
+        return self._email
+
+    @email.setter
+    def email(self, nuevo_email: str):
+        if not isinstance(nuevo_email, str):
+            raise TypeError("El email debe ser una cadena de texto.")
+        if not nuevo_email.strip():
+            raise ValueError("El email no puede estar vacío.")
+        if "@" not in nuevo_email:
+            raise ValueError("El formato del email no es válido (debe contener '@').")
+        self._email = nuevo_email.strip()
+
+    @property
+    def mascota(self) -> Mascota:
         return self._mascota
 
     @mascota.setter
@@ -28,6 +61,5 @@ class Propietario(Persona):
             f"{super().__str__()}\n"
             f"ID Propietario: {self.id_propietario}\n"
             f"Email: {self.email}\n"
-            f"Nombre Email: {self.nombre_email}\n"
-            f"Mascota: {self._mascota.nombre if self._mascota else 'Sin mascota'}"
+            f"Mascota: {self.mascota.nombre if self.mascota else 'Sin mascota'}"
         )

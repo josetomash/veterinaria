@@ -1,4 +1,5 @@
 from enum import Enum
+import datetime
 class MetodosPago(Enum):
     EFECTIVO = "Efectivo"
     TARJETA_CREDITO = "Tarjeta de Crédito"
@@ -8,7 +9,7 @@ class MetodosPago(Enum):
     CRIPTOMONEDA = "Criptomoneda"
 
 class Pago:
-    def __init__(self, id_pago: int, fecha_pago: date, monto: float, metodo_pago: MetodosPago):
+    def __init__(self, id_pago: int, fecha_pago: datetime.datetime, monto: float, metodo_pago: MetodosPago):
         self.id_pago = id_pago
         self.fecha_pago = fecha_pago
         self.monto = monto

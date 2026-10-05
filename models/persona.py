@@ -1,6 +1,5 @@
 class Persona:
-    def __init__(self, id_persona: int, nombre: str, rut: str, telefono: str):
-        self.id_persona = id_persona
+    def __init__(self, nombre: str, rut: str, telefono: str):
         self.nombre = nombre
         self.__rut = ""
         self.__telefono = ""
@@ -63,7 +62,6 @@ class Persona:
 
     def __str__(self):
         return (
-            f"ID: {self.id_persona}\n"
             f"Nombre: {self.nombre}\n"
             f"RUT: {self.rut}\n"
             f"Teléfono: {self.telefono}"

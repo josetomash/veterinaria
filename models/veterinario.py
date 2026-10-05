@@ -1,15 +1,35 @@
-from persona import Persona
-from especialidad import Especialidad
+from .persona import Persona
+from .especialidad import Especialidad
 
 
 class Veterinario(Persona):
-    def __init__(self, id_persona: int, nombre: str, rut: str, telefono: str, id_veterinario: int, especialidad: Especialidad):
+    def __init__(
+        self, 
+        id_persona: int, 
+        nombre: str, 
+        rut: str, 
+        telefono: str, 
+        id_veterinario: int, 
+        especialidad: Especialidad
+    ):
         super().__init__(id_persona, nombre, rut, telefono)
         self.id_veterinario = id_veterinario
         self.especialidad = especialidad
 
     @property
-    def especialidad(self):
+    def id_veterinario(self) -> int:
+        return self._id_veterinario
+
+    @id_veterinario.setter
+    def id_veterinario(self, nuevo_id: int):
+        if not isinstance(nuevo_id, int) or isinstance(nuevo_id, bool):
+            raise TypeError("El ID del veterinario debe ser un número entero.")
+        if nuevo_id <= 0:
+            raise ValueError("El ID del veterinario debe ser un número positivo mayor a 0.")
+        self._id_veterinario = nuevo_id
+
+    @property
+    def especialidad(self) -> Especialidad:
         return self._especialidad
 
     @especialidad.setter
@@ -21,7 +41,7 @@ class Veterinario(Persona):
     def realizar_consulta(self):
         pass
 
-    def __str__(self):
+    def __str__(self) -> str:
         return (
             f"{super().__str__()}\n"
             f"ID Veterinario: {self.id_veterinario}\n"

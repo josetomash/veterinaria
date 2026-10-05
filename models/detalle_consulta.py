@@ -1,57 +1,93 @@
-from receta_medica import RecetaMedica
+from .receta_medica import RecetaMedica
+
 
 class DetalleConsulta:
-    def __init__(self, id_detalle: int, diagnostico: str, tratamiento: str, receta: RecetaMedica):
-        """Constructor de la clase DetalleConsulta"""
-
-
-        self._id_detalle = id_detalle
-        self._diagnostico = diagnostico
-        self._tratamiento = tratamiento
-        self._receta = receta
-
+    def __init__(
+        self, 
+        id_detalle: int, 
+        diagnostico: str, 
+        tratamiento: str, 
+        receta: RecetaMedica
+    ):
+        """Constructor de la clase DetalleConsulta.
+        Delegamos en los setters asignando directamente a self.atributo.
+        """
+        self.id_detalle = id_detalle
+        self.diagnostico = diagnostico
+        self.tratamiento = tratamiento
+        self.receta = receta
 
     @property
-    def actualizar_valores(self):
-        """Propiedad para obtener los atributos de la clase DetalleConsulta"""
+    def id_detalle(self) -> int:
+        return self._id_detalle
 
-        return self.__dict__
+    @id_detalle.setter
+    def id_detalle(self, nuevo_id: int):
+        if not isinstance(nuevo_id, int) or isinstance(nuevo_id, bool):
+            raise TypeError("El ID del detalle debe ser un número entero.")
+        if nuevo_id <= 0:
+            raise ValueError("El ID del detalle debe ser un número entero positivo.")
+        self._id_detalle = nuevo_id
 
+    @property
+    def diagnostico(self) -> str:
+        return self._diagnostico
 
-    @actualizar_valores.setter
-    def actualizar_valores(self, valores: tuple):
-        """Setter para establecer los atributos de la clase DetalleConsulta"""
-        
-        atributos = list(self.__dict__.keys())          
-        cantidad_esperada = len(atributos)             
-        nombres = [attr.lstrip('_') for attr in atributos] 
-        nombres_str = ', '.join(nombres)                
-        
-        if not isinstance(valores, tuple):
-            raise TypeError("Los valores deben ser proporcionados en una tupla.")
-        elif len(valores) != cantidad_esperada:
-            raise ValueError(f"Se deben proporcionar exactamente {cantidad_esperada} valores: {nombres_str}.")
-        elif not isinstance(valores[3], RecetaMedica):
-            raise TypeError("El cuarto valor debe ser una instancia de RecetaMedica.")
-        elif not all(isinstance(valores[i], str) for i in range(1, 3)):
-            raise TypeError("Los valores de diagnóstico y tratamiento deben ser cadenas de texto.")
-        self._id_detalle, self._diagnostico, self._tratamiento, self._receta = valores
+    @diagnostico.setter
+    def diagnostico(self, nuevo_diagnostico: str):
+        if not isinstance(nuevo_diagnostico, str):
+            raise TypeError("El diagnóstico debe ser una cadena de texto.")
+        if not nuevo_diagnostico.strip():
+            raise ValueError("El diagnóstico no puede estar vacío.")
+        self._diagnostico = nuevo_diagnostico.strip()
 
-    def __str__(self):
-        """Dunder method para mostrar la clase instanciada con atributos"""
+    @property
+    def tratamiento(self) -> str:
+        return self._tratamiento
 
+    @tratamiento.setter
+    def tratamiento(self, nuevo_tratamiento: str):
+        if not isinstance(nuevo_tratamiento, str):
+            raise TypeError("El tratamiento debe ser una cadena de texto.")
+        if not nuevo_tratamiento.strip():
+            raise ValueError("El tratamiento no puede estar vacío.")
+        self._tratamiento = nuevo_tratamiento.strip()
 
+    @property
+    def receta(self) -> RecetaMedica:
+        return self._receta
+
+    @receta.setter
+    def receta(self, nueva_receta: RecetaMedica):
+        if not isinstance(nueva_receta, RecetaMedica):
+            raise TypeError("La receta debe ser una instancia válida de la clase RecetaMedica.")
+        self._receta = nueva_receta
+
+    def __str__(self) -> str:
+        """Representación amigable para consola."""
         return (
-            f"ID Detalle: {self._id_detalle}\n"
-            f"Diagnóstico: {self._diagnostico}\n"
-            f"Tratamiento: {self._tratamiento}\n"
+            f"ID Detalle: {self.id_detalle}\n"
+            f"Diagnóstico: {self.diagnostico}\n"
+            f"Tratamiento: {self.tratamiento}\n"
             f"Receta:\n"
-            f"  - ID: {self._receta.id_receta}\n"
-            f"  - Nombre Comercial: {self._receta.nombre_comercial}\n"
-            f"  - Cantidad: {self._receta.cantidad_mg}\n"
-            f"  - Indicaciones: {self._receta.instrucciones}"
+            f"  - ID: {self.receta.id_receta}\n"
+            f"  - Nombre Comercial: {self.receta.nombre_comercial}\n"
+            f"  - Cantidad: {self.receta.cantidad_mg} mg\n"
+            f"  - Indicaciones: {self.receta.instrucciones}"
         )
+
+    def __repr__(self) -> str:
+        """Representación técnica para depuración."""
+        return (
+            f"DetalleConsulta(id={self.id_detalle}, "
+            f"diagnostico='{self.diagnostico}', "
+            f"tratamiento='{self.tratamiento}', "
+            f"receta_id={self.receta.id_receta})"
+        )
+
+
+if __name__ == "__main__":
+    receta = RecetaMedica(1, 'Amoxicilina', 500, 'Tomar cada 12 horas por 7 días')
+    mi_consulta = DetalleConsulta(1, 'Infección leve', 'Administrar antibiótico', receta)
     
-receta = RecetaMedica(1,'amoxixilina',500,'tomar 100 veces al dia')
-mi_consulta = DetalleConsulta(1,'hola','cd',receta)
-print(mi_consulta)
+    print(mi_consulta)
