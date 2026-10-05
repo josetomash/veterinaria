@@ -1,24 +1,31 @@
-import sqlite3
-
 from dao import (
-    MedicamentoDAO,
     ConsultaDAO,
-    EspecialidadDAO,
     DetalleConsultaDAO,
+    EspecialidadDAO,
     EspecieDAO,
-    RecetaMedicaDAO,
     MascotaDAO,
+    MedicamentoDAO,
+    RecetaMedicaDAO,
+    PropietarioDAO,
 )
 from models import (
-    Medicamento,
     Consulta,
     DetalleConsulta,
-    Especie,
     Especialidad,
+    Especie,
     Mascota,
+    Medicamento,
     RecetaMedica,
+    Propietario,
 )
-
+from .consulta_service import ConsultaService
+from .detalle_consulta_service import DetalleConsultaService
+from .especialidad_service import EspecialidadService
+from .especie_service import EspecieService
+from .mascota_service import MascotaService
+from .medicamento_service import MedicamentoService
+from .receta_medica_service import RecetaMedicaService
+from .propietario_service import PropietarioService
 
 class ClinicaService:
     def __init__(
@@ -30,79 +37,36 @@ class ClinicaService:
         especialidad_dao: EspecialidadDAO,
         mascota_dao: MascotaDAO,
         receta_medica_dao: RecetaMedicaDAO,
+        propietario_dao: PropietarioDAO,
     ):
-        self._medicamento_dao = medicamento_dao
-        self._consulta_dao = consulta_dao
-        self._detalle_consulta_dao = detalle_consulta_dao
-        self._especie_dao = especie_dao
-        self._especialidad_dao = especialidad_dao
-        self._mascota_dao = mascota_dao
-        self._receta_medica_dao = receta_medica_dao
-
+        self._medicamento_service = MedicamentoService(medicamento_dao)
+        self._consulta_service = ConsultaService(consulta_dao)
+        self._detalle_consulta_service = DetalleConsultaService(detalle_consulta_dao)
+        self._especie_service = EspecieService(especie_dao)
+        self._especialidad_service = EspecialidadService(especialidad_dao)
+        self._mascota_service = MascotaService(mascota_dao)
+        self._receta_medica_service = RecetaMedicaService(receta_medica_dao)
+        self._propietario_service = PropietarioService(propietario_dao)
     def registrar_detalle_consulta(self, detalle: DetalleConsulta) -> DetalleConsulta:
-        if not isinstance(detalle, DetalleConsulta):
-            raise TypeError("Debe proporcionar un detalle de consulta válido.")
-        try:
-            self._detalle_consulta_dao.insertar(detalle)
-            return detalle
-        except sqlite3.IntegrityError as error:
-            raise ValueError(f"No se pudo registrar el detalle de consulta: {error}") from error
+        return self._detalle_consulta_service.registrar_detalle_consulta(detalle)
 
     def registrar_especie(self, especie: Especie) -> Especie:
-        if not isinstance(especie, Especie):
-            raise TypeError("Debe proporcionar una especie válida.")
-        try:
-            self._especie_dao.insertar(especie)
-            return especie
-        except sqlite3.IntegrityError as error:
-            nombre_limpio = especie.nombre.strip()
-            raise ValueError(f"No se pudo registrar: la especie '{nombre_limpio}' ya existe en el sistema.") from error
+        return self._especie_service.registrar_especie(especie)
 
     def registrar_consulta(self, consulta: Consulta) -> Consulta:
-        if not isinstance(consulta, Consulta):
-            raise TypeError("Debe proporcionar una consulta válida.")
-        try:
-            self._consulta_dao.insertar(consulta)
-            return consulta
-        except sqlite3.IntegrityError as error:
-            raise ValueError(f"No se pudo registrar la consulta: {error}") from error
+        return self._consulta_service.registrar_consulta(consulta)
 
     def registrar_receta_medica(self, receta: RecetaMedica) -> RecetaMedica:
-        if not isinstance(receta, RecetaMedica):
-            raise TypeError("Debe proporcionar una receta médica válida.")
-        try:
-            self._receta_medica_dao.insertar(receta)
-            return receta
-        except sqlite3.IntegrityError as error:
-            nombre_limpio = receta.nombre_comercial.strip()
-            raise ValueError(f"No se pudo registrar: la receta médica '{nombre_limpio}' ya existe en el sistema.") from error
+        return self._receta_medica_service.registrar_receta_medica(receta)
 
     def registrar_mascota(self, mascota: Mascota) -> Mascota:
-        if not isinstance(mascota, Mascota):
-            raise TypeError("Debe proporcionar una mascota válida.")
-        try:
-            self._mascota_dao.insertar(mascota)
-            return mascota
-        except sqlite3.IntegrityError as error:
-            nombre_limpio = mascota.nombre.strip()
-            raise ValueError(f"No se pudo registrar: la mascota '{nombre_limpio}' ya existe en el sistema.") from error
+        return self._mascota_service.registrar_mascota(mascota)
 
     def registrar_medicamento(self, medicamento: Medicamento) -> Medicamento:
-        if not isinstance(medicamento, Medicamento):
-            raise TypeError("Debe proporcionar un medicamento válido.")
-        try:
-            self._medicamento_dao.insertar(medicamento)
-            return medicamento
-        except sqlite3.IntegrityError as error:
-            nombre_limpio = medicamento.nombre.strip()
-            raise ValueError(f"No se pudo registrar: el medicamento '{nombre_limpio}' ya existe en el sistema.") from error
+        return self._medicamento_service.registrar_medicamento(medicamento)
 
     def registrar_especialidad(self, especialidad: Especialidad) -> Especialidad:
-        if not isinstance(especialidad, Especialidad):
-            raise TypeError("Debe proporcionar una especialidad válida del Enum Especialidad.")
-        try:
-            self._especialidad_dao.insertar(especialidad)
-            return especialidad
-        except sqlite3.IntegrityError as error:
-            nombre_limpio = especialidad.value.strip()
-            raise ValueError(f"No se pudo registrar: la especialidad '{nombre_limpio}' ya existe en el sistema.") from error
+        return self._especialidad_service.registrar_especialidad(especialidad)
+
+    def registrar_propietario(self, propietario: Propietario) -> Propietario:
+        return self._propietario_service.registrar_propietario(propietario)
