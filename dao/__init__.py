@@ -5,6 +5,7 @@ from .receta_medica_dao import RecetaMedicaDAO
 from .especie_dao import EspecieDAO
 from .especialidad_dao import EspecialidadDAO
 from .mascota_dao import MascotaDAO
+from .propietario_dao import PropietarioDAO
 
 __all__ = [
     "MedicamentoDAO",
@@ -14,4 +15,5 @@ __all__ = [
     "EspecieDAO",
     "EspecialidadDAO",
     "MascotaDAO",
+    "PropietarioDAO",
 ]
