@@ -19,4 +19,18 @@ un service por cada clase, se opto por utilizar un agente para refactorizar el c
 Esta decision fue debido a la madurez del codigo que ya tenia conectado gran parte del programa
 
 El agente realizo: Analizo el codigo, lo separo en responsabilidades, conservo compatiblidad
-Modelo: GPT-6 Luna | Copilot
+Agente: GPT-6 Luna | Copilot
+
+## Base de datos
+
+Se realizo la conexion de la base de datos mediante main.py el cual incializa la conexion
+conexion.py se encarga de repetir el codigo que estaba en los DAO asi no va creando
+varias conexiones, crea solo una y centraliza CRUD. Se uso "?" para tratar los datos del usuario
+meramente como texto y asi evitar f-strings para evitar inyecciones SQL
+
+¿Que hizo la IA?:
+
+`main.py` crea una instancia compartida de `Conexion` y la inyecta en los DAO.
+La clase centraliza la ejecución de consultas, el commit y el rollback de SQLite.
+
+Agente: GPT-6 Luna | Copilot

@@ -1,22 +1,22 @@
-import sqlite3
+from database.conexion import Conexion
 from models.veterinario import Veterinario
 
+
 class VeterinarioDAO:
-    def __init__(self, ruta_db: str = "database/clinica_veterinaria.db"):
-        self.ruta_db = ruta_db
+    def __init__(self, ruta_db: str | Conexion = "database/clinica_veterinaria.db"):
+        self.conexion = ruta_db if isinstance(ruta_db, Conexion) else Conexion(ruta_db)
         self._create_table()
 
     def _create_table(self):
-        with sqlite3.connect(self.ruta_db) as conn:
-            cursor = conn.cursor()
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS veterinarios (
-                    id_veterinario INTEGER PRIMARY KEY AUTOINCREMENT,
-                    nombre TEXT NOT NULL,
-                    especialidad TEXT NOT NULL
-                )
-            ''')
-            conn.commit()
+        self.conexion.ejecutar(
+            """
+            CREATE TABLE IF NOT EXISTS veterinarios (
+                id_veterinario INTEGER PRIMARY KEY AUTOINCREMENT,
+                nombre TEXT NOT NULL,
+                especialidad TEXT NOT NULL
+            )
+            """
+        )
 
     def insertar(self, veterinario: Veterinario) -> None:
         query = """
@@ -26,7 +26,4 @@ class VeterinarioDAO:
         nombre_limpio = veterinario.nombre.strip()
         especialidad_str = veterinario.especialidad.value.strip() if hasattr(veterinario.especialidad, 'value') else str(veterinario.especialidad).strip()
 
-        with sqlite3.connect(self.ruta_db) as conn:
-            cursor = conn.cursor()
-            cursor.execute(query, (nombre_limpio, especialidad_str))
-            conn.commit()
+        self.conexion.ejecutar(query, (nombre_limpio, especialidad_str))

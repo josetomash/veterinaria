@@ -15,5 +15,5 @@ class EspecieService:
             self._especie_dao.insertar(especie)
             return especie
         except sqlite3.IntegrityError as error:
-            nombre_limpio = especie.nombre.strip()
+            nombre_limpio = especie.nombre_especie.strip()
             raise ValueError(f"No se pudo registrar: la especie '{nombre_limpio}' ya existe en el sistema.") from error
