@@ -1,45 +1,28 @@
-# veterinaria/main.py
-"""
-Aplicar inyeccion de dependencias, instanciar conexion a la base de datos
-crear la capa de acceso a los datos y inicializar la capa de negocio
-y entregar al usuario la interfaz UI
-"""
-
-from pathlib import Path
-
-from screens.main_menu import MenuPrincipal
-from database.conexion import Conexion
+from database import ConexionDB
 from dao import (
-    ConsultaDAO,
-    DetalleConsultaDAO,
     EspecialidadDAO,
     EspecieDAO,
     MascotaDAO,
-    MedicamentoDAO,
     PropietarioDAO,
-    RecetaMedicaDAO,
+    VeterinarioDAO,
 )
-from services import ClinicaService
+from screens.main_menu import MenuPrincipal
+from services.mascota_service import MascotaService
+from services.propietario_service import PropietarioService
+from services.veterinario_service import VeterinarioService
 
 
 def main():
-    ruta_db = Path(__file__).resolve().parent / "database" / "clinica_veterinaria.db"
-    conexion = Conexion(str(ruta_db))
-    try:
-        clinica_service = ClinicaService(
-            medicamento_dao=MedicamentoDAO(conexion),
-            consulta_dao=ConsultaDAO(conexion),
-            detalle_consulta_dao=DetalleConsultaDAO(conexion),
-            especie_dao=EspecieDAO(conexion),
-            especialidad_dao=EspecialidadDAO(conexion),
-            mascota_dao=MascotaDAO(conexion),
-            receta_medica_dao=RecetaMedicaDAO(conexion),
-            propietario_dao=PropietarioDAO(conexion),
-        )
-        menu = MenuPrincipal(clinica_service)
-        menu.mostrar_menu()
-    finally:
-        conexion.cerrar()
+    conexion_db = ConexionDB()
+
+    EspecieDAO(conexion_db)
+    EspecialidadDAO(conexion_db)
+    propietario_service = PropietarioService(PropietarioDAO(conexion_db))
+    mascota_service = MascotaService(MascotaDAO(conexion_db))
+    veterinario_service = VeterinarioService(VeterinarioDAO(conexion_db))
+
+    menu = MenuPrincipal(propietario_service, mascota_service, veterinario_service)
+    menu.mostrar_menu()
 
 
 if __name__ == "__main__":

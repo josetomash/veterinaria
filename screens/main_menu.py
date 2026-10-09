@@ -1,10 +1,20 @@
 from screens.registrar_menu import RegistrarMenu
-from services.clinica_service import ClinicaService
+from screens.menu_consulta import MenuConsulta
+from services.mascota_service import MascotaService
+from services.propietario_service import PropietarioService
+from services.veterinario_service import VeterinarioService
 
 
 class MenuPrincipal:
-    def __init__(self, clinica_service: ClinicaService):
-        self._clinica_service = clinica_service
+    def __init__(
+        self,
+        propietario_service: PropietarioService,
+        mascota_service: MascotaService,
+        veterinario_service: VeterinarioService,
+    ):
+        self._propietario_service = propietario_service
+        self._mascota_service = mascota_service
+        self._veterinario_service = veterinario_service
 
     def mostrar_menu(self):
         print("=== Menú Principal ===")
@@ -15,7 +25,11 @@ class MenuPrincipal:
         print("======================")
         usuario = input("Seleccione una opción: ")
         if usuario == "1":
-            registrar_menu = RegistrarMenu(self._clinica_service)
+            registrar_menu = RegistrarMenu(
+                self._propietario_service,
+                self._mascota_service,
+                self._veterinario_service,
+            )
             registrar_menu.ejecutar()
         elif usuario == "2":
             return "2"
