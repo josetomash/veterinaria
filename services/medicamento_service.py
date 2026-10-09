@@ -15,5 +15,5 @@ class MedicamentoService:
             self._medicamento_dao.insertar(medicamento)
             return medicamento
         except sqlite3.IntegrityError as error:
-            nombre_limpio = medicamento.nombre.strip()
+            nombre_limpio = medicamento.nombre_comercial.strip()
             raise ValueError(f"No se pudo registrar: el medicamento '{nombre_limpio}' ya existe en el sistema.") from error

@@ -1,4 +1,3 @@
-from .clinica_service import ClinicaService
 from .consulta_service import ConsultaService
 from .detalle_consulta_service import DetalleConsultaService
 from .especialidad_service import EspecialidadService
@@ -7,9 +6,9 @@ from .mascota_service import MascotaService
 from .medicamento_service import MedicamentoService
 from .propietario_service import PropietarioService
 from .receta_medica_service import RecetaMedicaService
+from .veterinario_service import VeterinarioService
 
 __all__ = [
-    "ClinicaService",
     "ConsultaService",
     "DetalleConsultaService",
     "EspecialidadService",
@@ -18,4 +17,5 @@ __all__ = [
     "MedicamentoService",
     "PropietarioService",
     "RecetaMedicaService",
+    "VeterinarioService",
 ]
