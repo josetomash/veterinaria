@@ -1,35 +1,20 @@
-from pathlib import Path
 import sqlite3
-from typing import Sequence
+from contextlib import contextmanager
 
 
-class Conexion:
-    def __init__(self, ruta_db: str = "database/clinica_veterinaria.db"):
-        self.ruta_db = ruta_db
-        if ruta_db != ":memory:":
-            Path(ruta_db).parent.mkdir(parents=True, exist_ok=True)
-        self._conexion = sqlite3.connect(ruta_db)
+class ConexionDB:
+    def __init__(self, ruta_db: str = "database/clinica_vetcare.db"):
+        self._ruta_db = ruta_db
 
-    def ejecutar(
-        self,
-        query: str,
-        parametros: Sequence[object] = (),
-    ) -> sqlite3.Cursor:
+    @contextmanager
+    def obtener_conexion(self):
+        conn = sqlite3.connect(self._ruta_db)
         try:
-            cursor = self._conexion.execute(query, parametros)
-            self._conexion.commit()
-            return cursor
-        except sqlite3.Error:
-            self._conexion.rollback()
+            conn.execute("PRAGMA foreign_keys = ON")
+            yield conn
+            conn.commit()
+        except Exception:
+            conn.rollback()
             raise
-
-    def consultar(
-        self,
-        query: str,
-        parametros: Sequence[object] = (),
-    ) -> list[tuple[object, ...]]:
-        return self._conexion.execute(query, parametros).fetchall()
-
-    def cerrar(self) -> None:
-        self._conexion.close()
-
+        finally:
+            conn.close()
