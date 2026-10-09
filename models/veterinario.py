@@ -12,9 +12,22 @@ class Veterinario(Persona):
         id_veterinario: int, 
         especialidad: Especialidad
     ):
-        super().__init__(id_persona, nombre, rut, telefono)
+        super().__init__(nombre, rut, telefono)
+        self.id_persona = id_persona
         self.id_veterinario = id_veterinario
         self.especialidad = especialidad
+
+    @property
+    def id_persona(self) -> int:
+        return self._id_persona
+
+    @id_persona.setter
+    def id_persona(self, nuevo_id: int):
+        if not isinstance(nuevo_id, int) or isinstance(nuevo_id, bool):
+            raise TypeError("El ID de la persona debe ser un número entero.")
+        if nuevo_id <= 0:
+            raise ValueError("El ID de la persona debe ser un número positivo.")
+        self._id_persona = nuevo_id
 
     @property
     def id_veterinario(self) -> int:

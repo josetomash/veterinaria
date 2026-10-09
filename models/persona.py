@@ -1,14 +1,22 @@
 class Persona:
     def __init__(self, nombre: str, rut: str, telefono: str):
         self.nombre = nombre
-        self.__rut = ""
-        self.__telefono = ""
+        self._rut = ""
+        self._telefono = ""
         self.rut = rut
         self.telefono = telefono
 
     @property
+    def nombre(self) -> str:
+        return self._nombre
+
+    @nombre.setter
+    def nombre(self, nuevo_nombre: str):
+        self._nombre = nuevo_nombre
+
+    @property
     def rut(self) -> str:
-        return self.__rut
+        return self._rut
 
     @rut.setter
     def rut(self, rut_new: str):
@@ -37,13 +45,13 @@ class Persona:
         else:
             dv_calculado = str(resto)
         if dv_calculado == dv:
-            self.__rut = rut_original
+            self._rut = rut_original
         else:
             raise ValueError("Rut inválido, verifique bien el rut.")
 
     @property
     def telefono(self) -> str:
-        return self.__telefono
+        return self._telefono
 
     @telefono.setter
     def telefono(self, telefono_new: str):
@@ -55,7 +63,7 @@ class Persona:
             raise ValueError("Número de teléfono no reconocido. Debe comenzar con +569.")
         elif len(telefono_new) != 12:
             raise ValueError("Cantidad de dígitos imposible, verifique bien el número telefónico ingresado.")
-        self.__telefono = telefono_new
+        self._telefono = telefono_new
 
     def actualizar_telefono(self, nuevo_telefono: str):
         self.telefono = nuevo_telefono

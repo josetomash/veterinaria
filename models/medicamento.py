@@ -57,7 +57,7 @@ class Medicamento:
 
     @property
     def precio(self) -> float:
-        return self.__precio
+        return self._precio
 
     @precio.setter
     def precio(self, nuevo_precio: float):
@@ -66,11 +66,11 @@ class Medicamento:
         if nuevo_precio <= 0:
             raise ValueError(f"Invariante rota: el precio debe ser mayor a 0. Valor recibido {nuevo_precio}")
         # Lo convertimos a float para respetar el type hint de la función
-        self.__precio = float(nuevo_precio)
+        self._precio = float(nuevo_precio)
 
     @property
     def stock(self) -> int:
-        return self.__stock
+        return self._stock
 
     @stock.setter
     def stock(self, nuevo_stock: int):
@@ -78,7 +78,7 @@ class Medicamento:
             raise TypeError(f"El stock debe ser entero. Se recibe: {type(nuevo_stock).__name__}")
         if nuevo_stock < 0:
             raise ValueError(f"Stock negativo no permitido en VetCare. Intento asignar: {nuevo_stock}")
-        self.__stock = nuevo_stock
+        self._stock = nuevo_stock
 
     def __str__(self) -> str:
         return (

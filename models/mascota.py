@@ -57,8 +57,7 @@ class Mascota:
     @property
     def tipo_especie(self) -> str:
         """Devuelve dinámicamente el tipo_especie desde el objeto Especie asociado."""
-        # Se asume que el objeto Especie tiene un atributo o propiedad .tipo_especie
-        return self.especie.tipo_especie
+        return self.especie.nombre_especie
 
     def calcular_edad(self) -> int:
         """Calcula la edad de la mascota en años a partir de su fecha de nacimiento."""
