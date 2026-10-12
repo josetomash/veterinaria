@@ -24,5 +24,15 @@ class Consulta:
         if nueva_fecha > date.today():
             raise ValueError(f"Fecha invalida. La fecha no puede ser mayor a la fecha actual. fecha recibida: {nueva_fecha}")
         if nueva_fecha < date(2000, 1, 1):
-            raise ValueError(f"Fecha invalida. La fecha no puede ser menor a 01/01/200. fecha recibida: {nueva_fecha}")
+            raise ValueError(f"Fecha invalida. La fecha no puede ser menor a 01/01/2000. fecha recibida: {nueva_fecha}")
         self.__fecha_consulta = nueva_fecha
+
+    def agendar_consulta(self,nueva_fecha:date):
+        self.__fecha_consulta = nueva_fecha
+
+    def obtener_resumen(self):
+        print("="*15)
+        print("Consulta #",self.id_consulta)
+        print("Del",self.__fecha_consulta)
+        print("="+15)
+        print("Motivo:",self.motivo)

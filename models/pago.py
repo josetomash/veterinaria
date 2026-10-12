@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class MetodosPago(Enum):
     EFECTIVO = "Efectivo"
     TARJETA_CREDITO = "Tarjeta de Crédito"

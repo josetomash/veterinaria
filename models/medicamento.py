@@ -39,3 +39,5 @@ class Medicamento:
         if nuevo_stock < 0:
             raise ValueError (f"Stock negativo no permitido en VetCare. intento asignar: {nuevo_stock}")
         self.__stock = nuevo_stock 
+
+ 
