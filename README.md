@@ -246,7 +246,9 @@ classDiagram
     }
 
     class Especie {
-        + ConstructorEspecie(id_especie: int, nombre_especie: str, informacion_especie: str) void
+        <<enumeration>>
+        CANINO
+        FELINO
         - _id_especie int
         - _nombre_especie str
         - _informacion_especie str
@@ -362,19 +364,20 @@ classDiagram
 
     %% Asociaciones
     Propietario "0..*" --> "1" Mascota : tiene
-    Mascota "*" --> "1" Especie : pertenece a
-    Veterinario "*" --> "1" Especialidad : tiene
+    Mascota "0..*" --> "1" Especie : pertenece a
+    Veterinario "0..*" --> "1" Especialidad : tiene
 
-    %% Consulta (dependencias por id)
-    Consulta ..> Veterinario : veterinario_id
-    Consulta ..> Mascota : mascota_id
-    Consulta ..> Propietario : propietario_id
+    %% Cada consulta referencia exactamente un veterinario, mascota y propietario.
+    %% Cada uno de ellos puede estar asociado a cero o varias consultas.
+    Consulta "0..*" --> "1" Veterinario : veterinario_id
+    Consulta "0..*" --> "1" Mascota : mascota_id
+    Consulta "0..*" --> "1" Propietario : propietario_id
 
     %% Detalle / receta
-    DetalleConsulta "*" --> "1" RecetaMedica : referencia
+    DetalleConsulta "0..*" --> "1" RecetaMedica : referencia
 
     %% Pago
-    Pago ..> MetodosPago : metodo_pago
+    Pago "0..*" --> "1" MetodosPago : metodo_pago
 ```
 
 
@@ -450,35 +453,106 @@ classDiagram
     }
 
     class ConexionDB {
+        + ConstructorConexionDB(ruta_db: str) void
         - _ruta_db str
+        + obtener_conexion() ContextManager~Connection~
     }
 
     class MascotaDAO {
+        + ConstructorMascotaDAO(conexion_db: ConexionDB) void
         - _db ConexionDB
+        + crear_tabla() void
+        + insertar(mascota: Mascota) void
+        - _crear_mascota(fila: tuple) Mascota
+        + obtener_por_id_estricto(id_mascota: int) Mascota
+        + listar_todos() list~Mascota~
+        + actualizar(mascota: Mascota) bool
+        + eliminar(id_mascota: int) bool
     }
     class PropietarioDAO {
+        + ConstructorPropietarioDAO(conexion_db: ConexionDB) void
         - _db ConexionDB
+        + crear_tabla() void
+        + insertar(propietario: Propietario) void
+        - _crear_propietario(fila_propietario: tuple, fila_mascota: tuple) Propietario
+        + obtener_por_id_estricto(id_propietario: int) Propietario
+        + listar_todos() list~Propietario~
+        + actualizar(propietario: Propietario) bool
+        + eliminar(id_propietario: int) bool
     }
     class VeterinarioDAO {
+        + ConstructorVeterinarioDAO(conexion_db: ConexionDB) void
         - _db ConexionDB
+        + crear_tabla() void
+        + insertar(veterinario: Veterinario) void
+        + obtener_por_id_estricto(id_veterinario: int) Veterinario
+        + listar_todos() list~Veterinario~
+        + actualizar(veterinario: Veterinario) bool
+        + eliminar(id_veterinario: int) bool
     }
     class ConsultaDAO {
+        + ConstructorConsultaDAO(conexion_db: ConexionDB) void
         - _db ConexionDB
+        + crear_tabla() void
+        + insertar(consulta: Consulta) void
+        + obtener_por_id_estricto(id_consulta: int) Consulta
+        + listar_todos() list~Consulta~
+        + actualizar(consulta: Consulta) bool
+        + eliminar(id_consulta: int) bool
     }
     class DetalleConsultaDAO {
+        + ConstructorDetalleConsultaDAO(conexion_db: ConexionDB) void
         - _db ConexionDB
+        + crear_tabla() void
+        + insertar(detalle: DetalleConsulta) void
+        - _crear_detalle(fila_detalle: tuple, fila_receta: tuple) DetalleConsulta
+        + obtener_por_id_estricto(id_detalle: int) DetalleConsulta
+        + listar_todos() list~DetalleConsulta~
+        + actualizar(detalle: DetalleConsulta) bool
+        + eliminar(id_detalle: int) bool
     }
     class RecetaMedicaDAO {
+        + ConstructorRecetaMedicaDAO(conexion_db: ConexionDB) void
         - _db ConexionDB
+        + crear_tabla() void
+        + insertar(receta: RecetaMedica) void
+        + obtener_por_id_estricto(id_receta: int) RecetaMedica
+        + listar_todos() list~RecetaMedica~
+        + actualizar(receta: RecetaMedica) bool
+        + eliminar(id_receta: int) bool
     }
     class MedicamentoDAO {
+        + ConstructorMedicamentoDAO(conexion_db: ConexionDB) void
         - _db ConexionDB
+        - _crear_medicamento(fila: tuple) Medicamento
+        + crear_tabla() void
+        + insertar(medicamento: Medicamento) void
+        + obtener_por_id_estricto(id_medicamento: int) Medicamento
+        + listar_todos() list~Medicamento~
+        + buscar_por_termino_seguro(termino: str) list~Medicamento~
+        + actualizar(medicamento: Medicamento) bool
+        + eliminar(id_medicamento: int) bool
+        + actualizar_stock_seguro(id_medicamento: int, nuevo_stock: int) bool
     }
     class EspecieDAO {
+        + ConstructorEspecieDAO(conexion_db: ConexionDB) void
         - _db ConexionDB
+        + crear_tabla() void
+        + insertar(especie: Especie) void
+        + obtener_por_id_estricto(id_especie: int) Especie
+        + listar_todos() list~Especie~
+        + actualizar(especie: Especie) bool
+        + eliminar(id_especie: int) bool
     }
     class EspecialidadDAO {
+        + ConstructorEspecialidadDAO(conexion_db: ConexionDB) void
         - _db ConexionDB
+        + crear_tabla() void
+        + insertar(especialidad: Especialidad) void
+        + obtener_por_nombre_estricto(nombre: str) Especialidad
+        + listar_todos() list~Especialidad~
+        + actualizar(especialidad: Especialidad, nombre_anterior: str) bool
+        + eliminar(nombre: str) bool
     }
 
     MascotaService --> MascotaDAO : DAO
@@ -510,12 +584,26 @@ classDiagram
 
     class MenuPrincipal {
         + ConstructorMenuPrincipal(propietario_service: PropietarioService, mascota_service: MascotaService, veterinario_service: VeterinarioService, menu_consulta: MenuConsulta, medicamento_service: MedicamentoService, receta_medica_service: RecetaMedicaService, detalle_consulta_service: DetalleConsultaService) void
+        - _propietario_service PropietarioService
+        - _mascota_service MascotaService
+        - _veterinario_service VeterinarioService
         - _menu_consulta MenuConsulta
+        - _medicamento_service MedicamentoService
+        - _receta_medica_service RecetaMedicaService
+        - _detalle_consulta_service DetalleConsultaService
         + mostrar_menu() void
     }
 
     class MenuConsulta {
         + ConstructorMenuConsulta(mascota_service: MascotaService, propietario_service: PropietarioService, veterinario_service: VeterinarioService, consulta_service: ConsultaService, especie_service: EspecieService, detalle_consulta_service: DetalleConsultaService, receta_medica_service: RecetaMedicaService, medicamento_service: MedicamentoService) void
+        - _mascota_service MascotaService
+        - _propietario_service PropietarioService
+        - _veterinario_service VeterinarioService
+        - _consulta_service ConsultaService
+        - _especie_service EspecieService
+        - _detalle_consulta_service DetalleConsultaService
+        - _receta_medica_service RecetaMedicaService
+        - _medicamento_service MedicamentoService
         + consultar_menu() str
         + ejecutar() void
         - _listar_registros() void
@@ -555,11 +643,25 @@ classDiagram
     direction LR
 
     class MenuPrincipal {
+        + ConstructorMenuPrincipal(propietario_service: PropietarioService, mascota_service: MascotaService, veterinario_service: VeterinarioService, menu_consulta: MenuConsulta, medicamento_service: MedicamentoService, receta_medica_service: RecetaMedicaService, detalle_consulta_service: DetalleConsultaService) void
+        - _propietario_service PropietarioService
+        - _mascota_service MascotaService
+        - _veterinario_service VeterinarioService
+        - _menu_consulta MenuConsulta
+        - _medicamento_service MedicamentoService
+        - _receta_medica_service RecetaMedicaService
+        - _detalle_consulta_service DetalleConsultaService
         + mostrar_menu() void
     }
 
     class RegistrarMenu {
         + ConstructorRegistrarMenu(propietario_service: PropietarioService, mascota_service: MascotaService, veterinario_service: VeterinarioService, medicamento_service: MedicamentoService, receta_medica_service: RecetaMedicaService, detalle_consulta_service: DetalleConsultaService) void
+        - _propietario_service PropietarioService
+        - _mascota_service MascotaService
+        - _veterinario_service VeterinarioService
+        - _medicamento_service MedicamentoService
+        - _receta_medica_service RecetaMedicaService
+        - _detalle_consulta_service DetalleConsultaService
         + mostrar_menu() str
         + ejecutar() void
         - _registrar_propietario() void
