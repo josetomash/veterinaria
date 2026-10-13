@@ -202,8 +202,6 @@ classDiagram
         + nombre: str
         + rut: str
         + telefono: str
-        - _validar_rut(rut_new: str) str
-        - _validar_telefono(telefono_new: str) str
         + actualizar_telefono(nuevo_telefono: str) void
         + __str__() str
     }
@@ -382,7 +380,7 @@ classDiagram
     Pago "0..*" --> "1" MetodosPago : metodo_pago
 ```
 
-En `Persona`, `_nombre`, `_rut` y `_telefono` son los únicos atributos donde se almacenan esos valores. El constructor los asigna usando sus nombres privados; antes de guardar `_rut` y `_telefono`, llama a los validadores privados `_validar_rut` y `_validar_telefono`. Las propiedades públicas `nombre`, `rut` y `telefono` permiten leer los valores y, al asignarlas posteriormente, sus setters validan RUT y teléfono mediante esos mismos métodos. El setter de `nombre` solo guarda el valor.
+En `Persona`, `_nombre`, `_rut` y `_telefono` son los atributos privados donde se almacenan esos valores. El constructor asigna `nombre` directamente a `_nombre`, y asigna RUT y teléfono a través de `self.rut` y `self.telefono`: esas propiedades ejecutan sus setters, que validan y guardan los valores en `_rut` y `_telefono`. Así se conserva una única copia interna y se evita duplicar la lógica de validación.
 
 
 # Diagrama Mermaid: Servicios
