@@ -127,7 +127,7 @@ Cada operación usa `obtener_conexion()` para confirmar los cambios al terminar
 o revertirlos si ocurre un error. La base nueva se guarda en
 `database/clinica_vetcare.db`.
 
-## Flujo de registro de un propietario
+### Flujo de registro de un propietario
 
 Al registrar un propietario, el menú recoge los datos y construye el objeto
 `Propietario`. Después, la llamada sigue este recorrido:
@@ -158,14 +158,6 @@ propietario con ese mismo `id_mascota`, la referencia del propietario apunta a
 una fila de mascota existente y satisface la clave foránea. Esta lógica no solo
 reutiliza la mascota sin cambios: cuando el ID ya existe, sobrescribe sus datos
 con los del objeto recibido.
-
-Hay dos métodos distintos llamados `_crear_propietario`. El del menú crea el
-objeto a partir de los datos ingresados por el usuario. El de `PropietarioDAO`
-reconstruye un objeto a partir de filas obtenidas de la base de datos (por
-ejemplo, al listar o buscar propietarios), no inserta datos.
-
- El de `PropietarioDAO` se usa para instanciar nuevamente el objeto que creo el usuario para mostrarlo, cuando el programa consulta un propietario que ya esta guardado ese metodo reconstruye el bojeto en memoria para que luego el programa pueda mostrarlo o usar esos datos.
-
 
 ## Diagrama UML de clases
 
