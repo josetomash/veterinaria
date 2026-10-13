@@ -10,6 +10,11 @@ class Persona:
 
     @nombre.setter
     def nombre(self, nuevo_nombre: str):
+        if not isinstance(nuevo_nombre, str):
+            raise TypeError("El nombre debe ser una cadena de texto.")
+        for caracter in nuevo_nombre:
+            if caracter.isdigit():
+                raise ValueError("El nombre no puede contener números.")
         self._nombre = nuevo_nombre
 
     @property

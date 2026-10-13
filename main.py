@@ -56,6 +56,7 @@ def main():
         medicamento_service,
         receta_medica_service,
         detalle_consulta_service,
+        consulta_service,
     )
     menu.mostrar_menu()
 

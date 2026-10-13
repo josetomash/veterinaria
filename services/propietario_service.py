@@ -32,3 +32,9 @@ class PropietarioService:
         except sqlite3.IntegrityError as error:
             nombre_limpio = propietario.nombre.strip()
             raise ValueError(f"No se pudo registrar: el propietario '{nombre_limpio}' ya existe en el sistema.") from error
+
+    def actualizar_propietario(self, propietario: Propietario) -> bool:
+        return self._propietario_dao.actualizar(propietario)
+
+    def borrar_propietario(self, id_propietario: int) -> bool:
+        return self._propietario_dao.eliminar(id_propietario)

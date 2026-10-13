@@ -22,3 +22,9 @@ class ConsultaService:
             return consulta
         except sqlite3.IntegrityError as error:
             raise ValueError(f"No se pudo registrar la consulta: {error}") from error
+
+    def actualizar_consulta(self, consulta: Consulta) -> bool:
+        return self._consulta_dao.actualizar(consulta)
+
+    def borrar_consulta(self, id_consulta: int) -> bool:
+        return self._consulta_dao.eliminar(id_consulta)

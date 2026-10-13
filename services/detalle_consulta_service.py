@@ -22,3 +22,9 @@ class DetalleConsultaService:
             return detalle
         except sqlite3.IntegrityError as error:
             raise ValueError(f"No se pudo registrar el detalle de consulta: {error}") from error
+
+    def actualizar_detalle_consulta(self, detalle: DetalleConsulta) -> bool:
+        return self._detalle_consulta_dao.actualizar(detalle)
+
+    def borrar_detalle_consulta(self, id_detalle: int) -> bool:
+        return self._detalle_consulta_dao.eliminar(id_detalle)

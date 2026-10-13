@@ -54,3 +54,9 @@ class MascotaService:
         except sqlite3.IntegrityError as error:
             nombre_limpio = mascota.nombre.strip()
             raise ValueError(f"No se pudo registrar: la mascota '{nombre_limpio}' ya existe en el sistema.") from error
+
+    def actualizar_mascota(self, mascota: Mascota) -> bool:
+        return self._mascota_dao.actualizar(mascota)
+
+    def borrar_mascota(self, id_mascota: int) -> bool:
+        return self._mascota_dao.eliminar(id_mascota)

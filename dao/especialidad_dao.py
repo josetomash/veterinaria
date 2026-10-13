@@ -44,18 +44,3 @@ class EspecialidadDAO:
                 especialidades.append(especialidad)
         return especialidades
 
-    def actualizar(self, especialidad: Especialidad, nombre_anterior: str) -> bool:
-        sql = "UPDATE especialidades SET nombre = ? WHERE nombre = ?"
-        with self._db.obtener_conexion() as conn:
-            cursor = conn.execute(sql, (especialidad.value, nombre_anterior))
-            if cursor.rowcount == 0:
-                raise ValueError(f"No existe la especialidad '{nombre_anterior}'.")
-        return True
-
-    def eliminar(self, nombre: str) -> bool:
-        sql = "DELETE FROM especialidades WHERE nombre = ?"
-        with self._db.obtener_conexion() as conn:
-            cursor = conn.execute(sql, (nombre,))
-            if cursor.rowcount == 0:
-                raise ValueError(f"No existe la especialidad '{nombre}'.")
-        return True

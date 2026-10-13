@@ -23,3 +23,9 @@ class MedicamentoService:
         except sqlite3.IntegrityError as error:
             nombre_limpio = medicamento.nombre_comercial.strip()
             raise ValueError(f"No se pudo registrar: el medicamento '{nombre_limpio}' ya existe en el sistema.") from error
+
+    def actualizar_medicamento(self, medicamento: Medicamento) -> bool:
+        return self._medicamento_dao.actualizar(medicamento)
+
+    def borrar_medicamento(self, id_medicamento: int) -> bool:
+        return self._medicamento_dao.eliminar(id_medicamento)

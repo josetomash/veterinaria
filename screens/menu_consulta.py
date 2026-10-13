@@ -34,33 +34,78 @@ class MenuConsulta:
 
     def consultar_menu(self) -> str:
         print("\n=== Menú de Consulta ===")
-        print("1. Consultar por ID")
-        print("2. Consultar mascota por nombre")
-        print("3. Consultar mascota por especie")
-        print("4. Consultar mascota por edad")
-        print("5. Consultar por dueño")
-        print("6. Listar registros")
-        print("7. Volver al Menú Principal")
+        print("1. Consultar consulta por ID")
+        print("2. Consultar detalle de consulta por ID")
+        print("3. Consultar receta médica por ID")
+        print("4. Consultar medicamento por ID")
+        print("5. Consultar mascota por ID")
+        print("6. Consultar propietario por ID")
+        print("7. Consultar veterinario por ID")
+        print("8. Consultar especie por ID")
+        print("9. Consultar mascota por nombre")
+        print("10. Consultar mascota por especie")
+        print("11. Consultar mascota por edad")
+        print("12. Consultar por dueño")
+        print("13. Listar registros")
+        print("14. Volver al Menú Principal")
         print("========================")
         return input("Seleccione una opción: ").strip()
 
     def ejecutar(self) -> None:
         while True:
             respuesta = self.consultar_menu()
-            if respuesta == "7":
+            if respuesta == "14":
                 return
             try:
                 if respuesta == "1":
-                    self._consultar_por_id()
+                    self._consultar_por_id(
+                        "consulta",
+                        self._consulta_service.obtener_consulta_por_id,
+                    )
                 elif respuesta == "2":
-                    self._consultar_mascotas_por_nombre()
+                    self._consultar_por_id(
+                        "detalle de consulta",
+                        self._detalle_consulta_service.obtener_detalle_consulta_por_id,
+                    )
                 elif respuesta == "3":
-                    self._consultar_mascotas_por_especie()
+                    self._consultar_por_id(
+                        "receta médica",
+                        self._receta_medica_service.obtener_receta_medica_por_id,
+                    )
                 elif respuesta == "4":
-                    self._consultar_mascotas_por_edad()
+                    self._consultar_por_id(
+                        "medicamento",
+                        self._medicamento_service.obtener_medicamento_por_id,
+                    )
                 elif respuesta == "5":
-                    self._consultar_propietarios_por_nombre()
+                    self._consultar_por_id(
+                        "mascota",
+                        self._mascota_service.obtener_mascota_por_id,
+                    )
                 elif respuesta == "6":
+                    self._consultar_por_id(
+                        "propietario",
+                        self._propietario_service.obtener_propietario_por_id,
+                    )
+                elif respuesta == "7":
+                    self._consultar_por_id(
+                        "veterinario",
+                        self._veterinario_service.obtener_veterinario_por_id,
+                    )
+                elif respuesta == "8":
+                    self._consultar_por_id(
+                        "especie",
+                        self._especie_service.obtener_especie_por_id,
+                    )
+                elif respuesta == "9":
+                    self._consultar_mascotas_por_nombre()
+                elif respuesta == "10":
+                    self._consultar_mascotas_por_especie()
+                elif respuesta == "11":
+                    self._consultar_mascotas_por_edad()
+                elif respuesta == "12":
+                    self._consultar_propietarios_por_nombre()
+                elif respuesta == "13":
                     self._listar_registros()
                 else:
                     print("Opción no válida. Intente nuevamente.")
@@ -106,42 +151,10 @@ class MenuConsulta:
 
         self._imprimir_resultados(resultados)
 
-    def _consultar_por_id(self) -> None:
-        print("\n=== Consultar por ID ===")
-        print("1. Mascota")
-        print("2. Propietario")
-        print("3. Veterinario")
-        print("4. Consulta")
-        print("5. Especie")
-        print("6. Detalle de consulta")
-        print("7. Receta médica")
-        print("8. Medicamento")
-        print("9. Volver")
-        opcion = input("Seleccione una opción: ").strip()
-        if opcion == "9":
-            return
-
-        if opcion not in {"1", "2", "3", "4", "5", "6", "7", "8"}:
-            print("Opción no válida. Intente nuevamente.")
-            return
-
+    def _consultar_por_id(self, entidad, obtener_por_id) -> None:
         id_entidad = int(input("Ingrese el ID: "))
-        if opcion == "1":
-            resultado = self._mascota_service.obtener_mascota_por_id(id_entidad)
-        elif opcion == "2":
-            resultado = self._propietario_service.obtener_propietario_por_id(id_entidad)
-        elif opcion == "3":
-            resultado = self._veterinario_service.obtener_veterinario_por_id(id_entidad)
-        elif opcion == "4":
-            resultado = self._consulta_service.obtener_consulta_por_id(id_entidad)
-        elif opcion == "5":
-            resultado = self._especie_service.obtener_especie_por_id(id_entidad)
-        elif opcion == "6":
-            resultado = self._detalle_consulta_service.obtener_detalle_consulta_por_id(id_entidad)
-        elif opcion == "7":
-            resultado = self._receta_medica_service.obtener_receta_medica_por_id(id_entidad)
-        else:
-            resultado = self._medicamento_service.obtener_medicamento_por_id(id_entidad)
+        resultado = obtener_por_id(id_entidad)
+        print(f"\n=== Resultado: {entidad} ===")
         self._imprimir_resultado(resultado)
 
     def _consultar_mascotas_por_nombre(self) -> None:

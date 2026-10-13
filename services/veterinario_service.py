@@ -25,3 +25,9 @@ class VeterinarioService:
             raise ValueError(
                 f"No se pudo registrar: el veterinario '{nombre_limpio}' ya existe en el sistema."
             ) from error
+
+    def actualizar_veterinario(self, veterinario: Veterinario) -> bool:
+        return self._veterinario_dao.actualizar(veterinario)
+
+    def borrar_veterinario(self, id_veterinario: int) -> bool:
+        return self._veterinario_dao.eliminar(id_veterinario)

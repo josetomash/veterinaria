@@ -23,3 +23,9 @@ class RecetaMedicaService:
         except sqlite3.IntegrityError as error:
             nombre_limpio = receta.nombre_comercial.strip()
             raise ValueError(f"No se pudo registrar: la receta médica '{nombre_limpio}' ya existe en el sistema.") from error
+
+    def actualizar_receta_medica(self, receta: RecetaMedica) -> bool:
+        return self._receta_medica_dao.actualizar(receta)
+
+    def borrar_receta_medica(self, id_receta: int) -> bool:
+        return self._receta_medica_dao.eliminar(id_receta)

@@ -1,11 +1,14 @@
 from screens.registrar_menu import RegistrarMenu
 from screens.menu_consulta import MenuConsulta
+from screens.menu_borrar import MenuBorrar
+from screens.actualizar_menu import ActualizarMenu
 from services.mascota_service import MascotaService
 from services.detalle_consulta_service import DetalleConsultaService
 from services.medicamento_service import MedicamentoService
 from services.propietario_service import PropietarioService
 from services.receta_medica_service import RecetaMedicaService
 from services.veterinario_service import VeterinarioService
+from services.consulta_service import ConsultaService
 
 
 class MenuPrincipal:
@@ -18,6 +21,7 @@ class MenuPrincipal:
         medicamento_service: MedicamentoService,
         receta_medica_service: RecetaMedicaService,
         detalle_consulta_service: DetalleConsultaService,
+        consulta_service: ConsultaService,
     ):
         self._propietario_service = propietario_service
         self._mascota_service = mascota_service
@@ -26,6 +30,24 @@ class MenuPrincipal:
         self._medicamento_service = medicamento_service
         self._receta_medica_service = receta_medica_service
         self._detalle_consulta_service = detalle_consulta_service
+        self._menu_borrar = MenuBorrar(
+            consulta_service,
+            propietario_service,
+            mascota_service,
+            veterinario_service,
+            detalle_consulta_service,
+            medicamento_service,
+            receta_medica_service,
+        )
+        self._menu_actualizar = ActualizarMenu(
+            consulta_service,
+            detalle_consulta_service,
+            mascota_service,
+            medicamento_service,
+            propietario_service,
+            receta_medica_service,
+            veterinario_service,
+        )
 
     def mostrar_menu(self) -> None:
         while True:
@@ -33,7 +55,9 @@ class MenuPrincipal:
             print("Bienvenido al sistema de gestión veterinaria")
             print("1. Registrar consulta")
             print("2. Consultar")
-            print("3. Salir")
+            print("3. Borrar")
+            print("4. Actualizar")
+            print("5. Salir")
             print("======================")
             usuario = input("Seleccione una opción: ").strip()
             if usuario == "1":
@@ -49,6 +73,10 @@ class MenuPrincipal:
             elif usuario == "2":
                 self._menu_consulta.ejecutar()
             elif usuario == "3":
+                self._menu_borrar.ejecutar()
+            elif usuario == "4":
+                self._menu_actualizar.ejecutar()
+            elif usuario == "5":
                 print("Saliendo del sistema...")
                 return
             else:

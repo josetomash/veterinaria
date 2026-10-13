@@ -58,19 +58,3 @@ class EspecieDAO:
                 especies.append(especie)
         return especies
 
-    def actualizar(self, especie: Especie) -> bool:
-        sql = "UPDATE especies SET nombre = ?, informacion = ? WHERE id_especie = ?"
-        parametros = (especie.nombre_especie, especie.informacion_especie, especie.id_especie)
-        with self._db.obtener_conexion() as conn:
-            cursor = conn.execute(sql, parametros)
-            if cursor.rowcount == 0:
-                raise ValueError(f"No existe la especie con ID {especie.id_especie}.")
-        return True
-
-    def eliminar(self, id_especie: int) -> bool:
-        sql = "DELETE FROM especies WHERE id_especie = ?"
-        with self._db.obtener_conexion() as conn:
-            cursor = conn.execute(sql, (id_especie,))
-            if cursor.rowcount == 0:
-                raise ValueError(f"No existe la especie con ID {id_especie}.")
-        return True

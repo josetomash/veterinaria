@@ -11,6 +11,252 @@ Para automatizar este proceso se utilizo un agente IA.
 El agente realizo: Analizo el codigo, separo el setter monolitico en varios setters para cada atributo.
 Agente: Gemini 3.6 Flash
 
+# Uso de IA para agilizar desarrollo
+
+Código inicial, antes de integrar el borrado:
+```py
+class MenuBorrar():
+    def __init__(self, menu_principal):
+        self._menu_principal = menu_principal
+
+    def ejecutar(self):
+        print("=== Menú Borrar ===")
+        print("1. Borrar consulta")
+        print("2. Borrar propietario")
+        print("3. Borrar mascota")
+        print("4. Volver al menú principal")
+        opcion = input("Seleccione una opción: ").strip()
+
+        if opcion == "1":
+            self.borrar_consulta()
+        elif opcion == "2":
+            self.borrar_propietario()
+        elif opcion == "3":
+            self.borrar_mascota()
+        elif opcion == "4":
+            return
+        else:
+            print("Opción inválida. Intente nuevamente.")
+
+    def borrar_consulta(self):
+        id = input("Ingrese el ID de la consulta a borrar: ").strip()
+
+    def borrar_propietario(self):
+        id = input("Ingrese el ID del propietario a borrar: ").strip()
+
+    def borrar_mascota(self):
+        id = input("Ingrese el ID de la mascota a borrar: ").strip()
+```
+
+En donde cada service no tiene un metodo para borrar el ID usando DAO que ya tiene el metodo listo para usarse.
+
+Se agilizo el desarrollo usando este prompt:
+
+en menu borrar integra todos los demas DAO que tengan la funcion de borrar por ID, sigue la misma logica de if elif elif elif luego una def de borrar que pida input con el id. luego de eso se comprueba el id si es negativo o no es entero da error con typevalue.  Para cada def se comprueba
+
+Por ultimo en service crea una nueva funcion abajo de todas las demas que sea "borrar_x" donde x es el nombre del service ejemplo : "borrar_especie".
+
+Esta luego usara el borrar del DAO con el ID entregado en screen para borrar ese registro.
+
+CHATGPT-6 Luna | Copilot
+
+Codigo Nuevo:
+
+### `screens/menu_borrar.py`
+
+El menú recibe los ocho servicios cuyo DAO ofrece `eliminar(id)`: consulta,
+propietario, mascota, veterinario, detalle de consulta, medicamento, receta médica
+y especie. `EspecialidadDAO.eliminar()` recibe un nombre, no un ID, así que no se
+incluyó en este menú de borrado por ID.
+
+```python
+def ejecutar(self) -> None:
+    while True:
+        # Muestra opciones 1 a 8 para los registros y 9 para volver.
+        opcion = input("Seleccione una opción: ").strip()
+        if opcion == "1":
+            self.borrar_consulta()
+        elif opcion == "2":
+            self.borrar_propietario()
+        elif opcion == "3":
+            self.borrar_mascota()
+        elif opcion == "4":
+            self.borrar_veterinario()
+        elif opcion == "5":
+            self.borrar_detalle_consulta()
+        elif opcion == "6":
+            self.borrar_medicamento()
+        elif opcion == "7":
+            self.borrar_receta_medica()
+        elif opcion == "8":
+            self.borrar_especie()
+        elif opcion == "9":
+            return
+        else:
+            print("Opción inválida. Intente nuevamente.")
+```
+
+Cada operación pide un ID y delega en el método del servicio correspondiente.
+La comprobación compartida rechaza entradas que no sean enteros o IDs no
+positivos y muestra errores de registro inexistente o de claves foráneas:
+
+```python
+def _borrar_por_id(self, entidad: str, accion: Callable[[int], bool]) -> None:
+    try:
+        entrada_id = input(f"Ingrese el ID de {entidad} a borrar: ").strip()
+        try:
+            id_registro = int(entrada_id)
+        except ValueError as error:
+            raise ValueError("El ID debe ser un número entero.") from error
+        if id_registro <= 0:
+            raise ValueError("El ID debe ser un número entero positivo.")
+        accion(id_registro)
+    except (TypeError, ValueError) as error:
+        print(f"No se pudo borrar el registro de {entidad}: {error}")
+    except sqlite3.IntegrityError:
+        print(
+            f"No se pudo borrar el registro de {entidad}: existen registros relacionados "
+            "que impiden la eliminación."
+        )
+    else:
+        print(f"El registro de {entidad} se eliminó correctamente.")
+```
+
+Las operaciones específicas conectan cada opción al servicio:
+
+```python
+def borrar_consulta(self) -> None:
+    self._borrar_por_id("consulta", self._consulta_service.borrar_consulta)
+
+def borrar_propietario(self) -> None:
+    self._borrar_por_id("propietario", self._propietario_service.borrar_propietario)
+
+def borrar_mascota(self) -> None:
+    self._borrar_por_id("mascota", self._mascota_service.borrar_mascota)
+
+def borrar_veterinario(self) -> None:
+    self._borrar_por_id("veterinario", self._veterinario_service.borrar_veterinario)
+
+def borrar_detalle_consulta(self) -> None:
+    self._borrar_por_id(
+        "detalle de consulta",
+        self._detalle_consulta_service.borrar_detalle_consulta,
+    )
+
+def borrar_medicamento(self) -> None:
+    self._borrar_por_id("medicamento", self._medicamento_service.borrar_medicamento)
+
+def borrar_receta_medica(self) -> None:
+    self._borrar_por_id("receta médica", self._receta_medica_service.borrar_receta_medica)
+
+def borrar_especie(self) -> None:
+    self._borrar_por_id("especie", self._especie_service.borrar_especie)
+```
+
+### Métodos nuevos de los servicios
+
+Cada servicio delega el ID recibido al método `eliminar()` de su DAO:
+
+```python
+# consulta_service.py
+def borrar_consulta(self, id_consulta: int) -> bool:
+    return self._consulta_dao.eliminar(id_consulta)
+
+# propietario_service.py
+def borrar_propietario(self, id_propietario: int) -> bool:
+    return self._propietario_dao.eliminar(id_propietario)
+
+# mascota_service.py
+def borrar_mascota(self, id_mascota: int) -> bool:
+    return self._mascota_dao.eliminar(id_mascota)
+
+# veterinario_service.py
+def borrar_veterinario(self, id_veterinario: int) -> bool:
+    return self._veterinario_dao.eliminar(id_veterinario)
+
+# detalle_consulta_service.py
+def borrar_detalle_consulta(self, id_detalle: int) -> bool:
+    return self._detalle_consulta_dao.eliminar(id_detalle)
+
+# medicamento_service.py
+def borrar_medicamento(self, id_medicamento: int) -> bool:
+    return self._medicamento_dao.eliminar(id_medicamento)
+
+# receta_medica_service.py
+def borrar_receta_medica(self, id_receta: int) -> bool:
+    return self._receta_medica_dao.eliminar(id_receta)
+
+# especie_service.py
+def borrar_especie(self, id_especie: int) -> bool:
+    return self._especie_dao.eliminar(id_especie)
+```
+
+## Evaluacion critica
+
+Me di la tarea de validar el codigo generado por la IA 
+Lo primero que me causo ruido fue sobre ingenieria en:
+_borrar_por_id(self, entidad: str, accion: Callable[[int], bool]) -> None:
+
+se cambio a:
+    def _borrar_por_id(self, entidad, accion):
+
+Muchas más legible, sacrificando TypeHints innecesarios que dificultaban la lectura del grupo.
+
+Más haya de eso, los DAO ya tenian implementados el metodo borrar por ID, asi que la IA simplemente funciono de conector, agilizando trabajo repetitivo de tener que modificar cada .service con un metodo borrar y este llamar al DAO para borrar ese registro.
+
+### Regla de Negocio
+
+Las clases ENUMERATE no deberian ser borrables del sistema, por lo tanto no integre eso.
+
+### Test de Validacion (Test/QA)
+
+Luego de ese pequeño ajuste empece a verificar el codigo nuevo, verificando que no hubieran errores. Esto se encuentra en Image en /Pruebas.
+
+# Reciclando logica para agregar una nueva funcion de actualizar
+
+Prompt: 
+actualizar_menu.py sigue la misma logica que los demas menu:
+
+logica de if elif elif elif elif else
+integrar un nuevo metodo en los service que sea actualizar_x donde "x" es el nombre del service
+que ese service llame al DAO que tenga el metodo de actualizar
+actualizar_menu.py pedira el ID y luego el relleno de los datos a actualizar.
+los DAOs que no tengan un metodo de actualizacion no se meten en el menu, se da por hecho que fueron creados con la intencion de que no se actualicen. 
+
+main_menu.py llama a la clase actualizar_menu con una nueva opcion
+
+Evita type hints excesivos, mantenlo simple, deja typehints sin tanta complejidad o no los uses en partes que se vuelvan muy ilegibles.
+
+reutiliza el actualizar DAO asi que intenta no tocar los DAOs.
+
+Respuesta:
+
+Se agregó un menú para actualizar las siete entidades cuyos DAO ya tenían ese método. La mayor parte fue reutilizar la lógica existente: el menú pide el ID y los nuevos datos, y cada servicio delega la actualización a su DAO. No fue necesario modificar los DAO.
+
+El menú sigue el patrón de opciones `if/elif` y deriva cada caso a su formulario:
+
+```python
+if opcion == "1":
+    self._ejecutar_actualizacion("consulta", self._actualizar_consulta)
+elif opcion == "2":
+    self._ejecutar_actualizacion(
+        "detalle de consulta",
+        self._actualizar_detalle_consulta,
+    )
+```
+
+Los servicios repiten la misma delegación al método `actualizar` existente en su DAO:
+
+```python
+def actualizar_consulta(self, consulta):
+    return self._consulta_dao.actualizar(consulta)
+```
+
+## Evaluacion Critica:
+
+La mayor parte del trabajo ya estaba hecho, asi que la IA solo hizo la parte pesada de reutilizar codigo, igualmente, se hicieron sus debidas comprobaciones que estan en Pruebas/Image.
+
+
 ## Servicios
 
 Cada entidad tiene su propio servicio (`*_service.py`). La interfaz recibe directamente
@@ -394,6 +640,7 @@ classDiagram
         + buscar_mascotas_por_especie(termino: str) list~Mascota~
         + buscar_mascotas_por_edad(edad: int) list~Mascota~
         + registrar_mascota(mascota: Mascota) Mascota
+        + borrar_mascota(id_mascota: int) bool
     }
     class PropietarioService {
         + ConstructorPropietarioService(propietario_dao: PropietarioDAO) void
@@ -402,6 +649,7 @@ classDiagram
         + listar_propietarios() list~Propietario~
         + buscar_propietarios_por_nombre(termino: str) list~Propietario~
         + registrar_propietario(propietario: Propietario) Propietario
+        + borrar_propietario(id_propietario: int) bool
     }
     class VeterinarioService {
         + ConstructorVeterinarioService(veterinario_dao: VeterinarioDAO) void
@@ -409,6 +657,7 @@ classDiagram
         + obtener_veterinario_por_id(id_veterinario: int) Veterinario
         + listar_veterinarios() list~Veterinario~
         + registrar_veterinario(veterinario: Veterinario) Veterinario
+        + borrar_veterinario(id_veterinario: int) bool
     }
     class ConsultaService {
         + ConstructorConsultaService(consulta_dao: ConsultaDAO) void
@@ -416,6 +665,7 @@ classDiagram
         + obtener_consulta_por_id(id_consulta: int) Consulta
         + listar_consultas() list~Consulta~
         + registrar_consulta(consulta: Consulta) Consulta
+        + borrar_consulta(id_consulta: int) bool
     }
     class DetalleConsultaService {
         + ConstructorDetalleConsultaService(detalle_consulta_dao: DetalleConsultaDAO) void
@@ -423,6 +673,7 @@ classDiagram
         + obtener_detalle_consulta_por_id(id_detalle: int) DetalleConsulta
         + listar_detalles_consulta() list~DetalleConsulta~
         + registrar_detalle_consulta(detalle: DetalleConsulta) DetalleConsulta
+        + borrar_detalle_consulta(id_detalle: int) bool
     }
     class RecetaMedicaService {
         + ConstructorRecetaMedicaService(receta_medica_dao: RecetaMedicaDAO) void
@@ -430,6 +681,7 @@ classDiagram
         + obtener_receta_medica_por_id(id_receta: int) RecetaMedica
         + listar_recetas_medicas() list~RecetaMedica~
         + registrar_receta_medica(receta: RecetaMedica) RecetaMedica
+        + borrar_receta_medica(id_receta: int) bool
     }
     class MedicamentoService {
         + ConstructorMedicamentoService(medicamento_dao: MedicamentoDAO) void
@@ -437,6 +689,7 @@ classDiagram
         + obtener_medicamento_por_id(id_medicamento: int) Medicamento
         + listar_medicamentos() list~Medicamento~
         + registrar_medicamento(medicamento: Medicamento) Medicamento
+        + borrar_medicamento(id_medicamento: int) bool
     }
     class EspecieService {
         + ConstructorEspecieService(especie_dao: EspecieDAO) void
@@ -444,6 +697,7 @@ classDiagram
         + obtener_especie_por_id(id_especie: int) Especie
         + listar_especies() list~Especie~
         + registrar_especie(especie: Especie) Especie
+        + borrar_especie(id_especie: int) bool
     }
     class EspecialidadService {
         + ConstructorEspecialidadService(especialidad_dao: EspecialidadDAO) void
@@ -582,7 +836,7 @@ classDiagram
     direction LR
 
     class MenuPrincipal {
-        + ConstructorMenuPrincipal(propietario_service: PropietarioService, mascota_service: MascotaService, veterinario_service: VeterinarioService, menu_consulta: MenuConsulta, medicamento_service: MedicamentoService, receta_medica_service: RecetaMedicaService, detalle_consulta_service: DetalleConsultaService) void
+        + ConstructorMenuPrincipal(propietario_service: PropietarioService, mascota_service: MascotaService, veterinario_service: VeterinarioService, menu_consulta: MenuConsulta, medicamento_service: MedicamentoService, receta_medica_service: RecetaMedicaService, detalle_consulta_service: DetalleConsultaService, consulta_service: ConsultaService, especie_service: EspecieService) void
         - _propietario_service PropietarioService
         - _mascota_service MascotaService
         - _veterinario_service VeterinarioService
@@ -590,7 +844,22 @@ classDiagram
         - _medicamento_service MedicamentoService
         - _receta_medica_service RecetaMedicaService
         - _detalle_consulta_service DetalleConsultaService
+        - _menu_borrar MenuBorrar
         + mostrar_menu() void
+    }
+
+    class MenuBorrar {
+        + ConstructorMenuBorrar(consulta_service: ConsultaService, propietario_service: PropietarioService, mascota_service: MascotaService, veterinario_service: VeterinarioService, detalle_consulta_service: DetalleConsultaService, medicamento_service: MedicamentoService, receta_medica_service: RecetaMedicaService, especie_service: EspecieService) void
+        + ejecutar() void
+        - _borrar_por_id(entidad: str, accion: Callable) void
+        + borrar_consulta() void
+        + borrar_propietario() void
+        + borrar_mascota() void
+        + borrar_veterinario() void
+        + borrar_detalle_consulta() void
+        + borrar_medicamento() void
+        + borrar_receta_medica() void
+        + borrar_especie() void
     }
 
     class MenuConsulta {
@@ -625,6 +894,15 @@ classDiagram
     class MedicamentoService
 
     MenuPrincipal --> MenuConsulta : abre
+    MenuPrincipal *-- MenuBorrar : crea
+    MenuBorrar --> ConsultaService : usa
+    MenuBorrar --> PropietarioService : usa
+    MenuBorrar --> MascotaService : usa
+    MenuBorrar --> VeterinarioService : usa
+    MenuBorrar --> DetalleConsultaService : usa
+    MenuBorrar --> MedicamentoService : usa
+    MenuBorrar --> RecetaMedicaService : usa
+    MenuBorrar --> EspecieService : usa
 
     MenuConsulta --> MascotaService : usa
     MenuConsulta --> PropietarioService : usa
@@ -636,13 +914,13 @@ classDiagram
     MenuConsulta --> MedicamentoService : usa
 ```
 
-# Diagrama Mermaid: Menus Registro
+# Diagrama Mermaid: Menus Registro y Borrado
 ```mermaid
 classDiagram
     direction LR
 
     class MenuPrincipal {
-        + ConstructorMenuPrincipal(propietario_service: PropietarioService, mascota_service: MascotaService, veterinario_service: VeterinarioService, menu_consulta: MenuConsulta, medicamento_service: MedicamentoService, receta_medica_service: RecetaMedicaService, detalle_consulta_service: DetalleConsultaService) void
+        + ConstructorMenuPrincipal(propietario_service: PropietarioService, mascota_service: MascotaService, veterinario_service: VeterinarioService, menu_consulta: MenuConsulta, medicamento_service: MedicamentoService, receta_medica_service: RecetaMedicaService, detalle_consulta_service: DetalleConsultaService, consulta_service: ConsultaService, especie_service: EspecieService) void
         - _propietario_service PropietarioService
         - _mascota_service MascotaService
         - _veterinario_service VeterinarioService
@@ -650,6 +928,7 @@ classDiagram
         - _medicamento_service MedicamentoService
         - _receta_medica_service RecetaMedicaService
         - _detalle_consulta_service DetalleConsultaService
+        - _menu_borrar MenuBorrar
         + mostrar_menu() void
     }
 
@@ -684,8 +963,42 @@ classDiagram
     class RecetaMedicaService
     class DetalleConsultaService
     class RecetaMedica
+    class ConsultaService
+    class EspecieService
+    class MenuConsulta
+
+    class MenuBorrar {
+        + ConstructorMenuBorrar(consulta_service: ConsultaService, propietario_service: PropietarioService, mascota_service: MascotaService, veterinario_service: VeterinarioService, detalle_consulta_service: DetalleConsultaService, medicamento_service: MedicamentoService, receta_medica_service: RecetaMedicaService, especie_service: EspecieService) void
+        - _consulta_service ConsultaService
+        - _propietario_service PropietarioService
+        - _mascota_service MascotaService
+        - _veterinario_service VeterinarioService
+        - _detalle_consulta_service DetalleConsultaService
+        - _medicamento_service MedicamentoService
+        - _receta_medica_service RecetaMedicaService
+        - _especie_service EspecieService
+        + ejecutar() void
+        - _borrar_por_id(entidad: str, accion: Callable) void
+        + borrar_consulta() void
+        + borrar_propietario() void
+        + borrar_mascota() void
+        + borrar_veterinario() void
+        + borrar_detalle_consulta() void
+        + borrar_medicamento() void
+        + borrar_receta_medica() void
+        + borrar_especie() void
+    }
 
     MenuPrincipal *-- RegistrarMenu : crea temporalmente
+    MenuPrincipal *-- MenuBorrar : crea en inicialización
+    MenuBorrar --> ConsultaService : usa
+    MenuBorrar --> PropietarioService : usa
+    MenuBorrar --> MascotaService : usa
+    MenuBorrar --> VeterinarioService : usa
+    MenuBorrar --> DetalleConsultaService : usa
+    MenuBorrar --> MedicamentoService : usa
+    MenuBorrar --> RecetaMedicaService : usa
+    MenuBorrar --> EspecieService : usa
 
     RegistrarMenu --> PropietarioService : usa
     RegistrarMenu --> MascotaService : usa
