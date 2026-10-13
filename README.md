@@ -127,6 +127,28 @@ Cada operación usa `obtener_conexion()` para confirmar los cambios al terminar
 o revertirlos si ocurre un error. La base nueva se guarda en
 `database/clinica_vetcare.db`.
 
+### Flujo de registro de un propietario
+
+Al registrar un propietario, el menú recoge los datos y construye el objeto
+`Propietario`. Después, la llamada sigue este recorrido:
+
+1. `RegistrarMenu._registrar_propietario()` llama a
+   `PropietarioService.registrar_propietario(propietario)`.
+2. El servicio valida el objeto y delega la escritura en
+   `PropietarioDAO.insertar(propietario)`.
+3. El DAO abre una conexión con `ConexionDB.obtener_conexion()` y ejecuta las
+   sentencias SQL con `conn.execute(...)`: primero guarda la especie, luego la
+   mascota y finalmente el propietario.
+4. Si todo termina correctamente, `obtener_conexion()` confirma la transacción
+   con `commit`; si ocurre un error, la revierte con `rollback`.
+
+Hay dos métodos distintos llamados `_crear_propietario`. El del menú crea el
+objeto a partir de los datos ingresados por el usuario. El de `PropietarioDAO`
+reconstruye un objeto a partir de filas obtenidas de la base de datos (por
+ejemplo, al listar o buscar propietarios), no inserta datos.
+
+ El de `PropietarioDAO` se usa para instanciar nuevamente el objeto que creo el usuario para mostrarlo, cuando el programa consulta un propietario que ya esta guardado ese metodo reconstruye el bojeto en memoria para que luego el programa pueda mostrarlo o usar esos datos.
+
 Agente: GPT-6 Luna | Copilot
 
 ## Diagrama UML de clases
