@@ -1,10 +1,8 @@
 class Persona:
     def __init__(self, nombre: str, rut: str, telefono: str):
-        self.nombre = nombre
-        self._rut = ""
-        self._telefono = ""
-        self.rut = rut
-        self.telefono = telefono
+        self._nombre = nombre
+        self._rut = self._validar_rut(rut)
+        self._telefono = self._validar_telefono(telefono)
 
     @property
     def nombre(self) -> str:
@@ -20,6 +18,10 @@ class Persona:
 
     @rut.setter
     def rut(self, rut_new: str):
+        self._rut = self._validar_rut(rut_new)
+
+    @staticmethod
+    def _validar_rut(rut_new: str) -> str:
         if not isinstance(rut_new, str):
             raise TypeError("El RUT debe ser una cadena de texto.")
         rut_original = rut_new
@@ -45,7 +47,7 @@ class Persona:
         else:
             dv_calculado = str(resto)
         if dv_calculado == dv:
-            self._rut = rut_original
+            return rut_original
         else:
             raise ValueError("Rut inválido, verifique bien el rut.")
 
@@ -55,6 +57,10 @@ class Persona:
 
     @telefono.setter
     def telefono(self, telefono_new: str):
+        self._telefono = self._validar_telefono(telefono_new)
+
+    @staticmethod
+    def _validar_telefono(telefono_new: str) -> str:
         if not isinstance(telefono_new, str):
             raise TypeError("El teléfono debe ser una cadena de texto.")
         telefono_new = telefono_new.strip()
@@ -63,7 +69,7 @@ class Persona:
             raise ValueError("Número de teléfono no reconocido. Debe comenzar con +569.")
         elif len(telefono_new) != 12:
             raise ValueError("Cantidad de dígitos imposible, verifique bien el número telefónico ingresado.")
-        self._telefono = telefono_new
+        return telefono_new
 
     def actualizar_telefono(self, nuevo_telefono: str):
         self.telefono = nuevo_telefono
