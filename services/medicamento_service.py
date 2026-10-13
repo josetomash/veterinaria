@@ -8,6 +8,12 @@ class MedicamentoService:
     def __init__(self, medicamento_dao: MedicamentoDAO):
         self._medicamento_dao = medicamento_dao
 
+    def obtener_medicamento_por_id(self, id_medicamento: int) -> Medicamento:
+        return self._medicamento_dao.obtener_por_id_estricto(id_medicamento)
+
+    def listar_medicamentos(self) -> list[Medicamento]:
+        return self._medicamento_dao.listar_todos()
+
     def registrar_medicamento(self, medicamento: Medicamento) -> Medicamento:
         if not isinstance(medicamento, Medicamento):
             raise TypeError("Debe proporcionar un medicamento válido.")

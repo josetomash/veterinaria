@@ -8,6 +8,12 @@ class RecetaMedicaService:
     def __init__(self, receta_medica_dao: RecetaMedicaDAO):
         self._receta_medica_dao = receta_medica_dao
 
+    def obtener_receta_medica_por_id(self, id_receta: int) -> RecetaMedica:
+        return self._receta_medica_dao.obtener_por_id_estricto(id_receta)
+
+    def listar_recetas_medicas(self) -> list[RecetaMedica]:
+        return self._receta_medica_dao.listar_todos()
+
     def registrar_receta_medica(self, receta: RecetaMedica) -> RecetaMedica:
         if not isinstance(receta, RecetaMedica):
             raise TypeError("Debe proporcionar una receta médica válida.")

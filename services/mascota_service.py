@@ -8,6 +8,43 @@ class MascotaService:
     def __init__(self, mascota_dao: MascotaDAO):
         self._mascota_dao = mascota_dao
 
+    def obtener_mascota_por_id(self, id_mascota: int) -> Mascota:
+        return self._mascota_dao.obtener_por_id_estricto(id_mascota)
+
+    def listar_mascotas(self) -> list[Mascota]:
+        return self._mascota_dao.listar_todos()
+
+    def buscar_mascotas_por_nombre(self, termino: str) -> list[Mascota]:
+        termino_limpio = termino.strip().casefold()
+        if not termino_limpio:
+            raise ValueError("Debe proporcionar un nombre para buscar.")
+        return [
+            mascota
+            for mascota in self._mascota_dao.listar_todos()
+            if termino_limpio in mascota.nombre.casefold()
+        ]
+
+    def buscar_mascotas_por_especie(self, termino: str) -> list[Mascota]:
+        termino_limpio = termino.strip().casefold()
+        if not termino_limpio:
+            raise ValueError("Debe proporcionar una especie para buscar.")
+        return [
+            mascota
+            for mascota in self._mascota_dao.listar_todos()
+            if termino_limpio in mascota.especie.nombre_especie.casefold()
+        ]
+
+    def buscar_mascotas_por_edad(self, edad: int) -> list[Mascota]:
+        if not isinstance(edad, int) or isinstance(edad, bool):
+            raise TypeError("La edad debe ser un número entero.")
+        if edad < 0:
+            raise ValueError("La edad no puede ser negativa.")
+        return [
+            mascota
+            for mascota in self._mascota_dao.listar_todos()
+            if mascota.calcular_edad() == edad
+        ]
+
     def registrar_mascota(self, mascota: Mascota) -> Mascota:
         if not isinstance(mascota, Mascota):
             raise TypeError("Debe proporcionar una mascota válida.")

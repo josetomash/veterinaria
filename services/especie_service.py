@@ -8,6 +8,12 @@ class EspecieService:
     def __init__(self, especie_dao: EspecieDAO):
         self._especie_dao = especie_dao
 
+    def obtener_especie_por_id(self, id_especie: int) -> Especie:
+        return self._especie_dao.obtener_por_id_estricto(id_especie)
+
+    def listar_especies(self) -> list[Especie]:
+        return self._especie_dao.listar_todos()
+
     def registrar_especie(self, especie: Especie) -> Especie:
         if not isinstance(especie, Especie):
             raise TypeError("Debe proporcionar una especie válida.")

@@ -8,6 +8,12 @@ class VeterinarioService:
     def __init__(self, veterinario_dao: VeterinarioDAO):
         self._veterinario_dao = veterinario_dao
 
+    def obtener_veterinario_por_id(self, id_veterinario: int) -> Veterinario:
+        return self._veterinario_dao.obtener_por_id_estricto(id_veterinario)
+
+    def listar_veterinarios(self) -> list[Veterinario]:
+        return self._veterinario_dao.listar_todos()
+
     def registrar_veterinario(self, veterinario: Veterinario) -> Veterinario:
         if not isinstance(veterinario, Veterinario):
             raise TypeError("Debe proporcionar un veterinario válido.")
