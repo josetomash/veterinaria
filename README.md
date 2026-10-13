@@ -380,9 +380,6 @@ classDiagram
     Pago "0..*" --> "1" MetodosPago : metodo_pago
 ```
 
-En `Persona`, `_nombre`, `_rut` y `_telefono` son los atributos privados donde se almacenan esos valores. El constructor asigna `nombre` directamente a `_nombre`, y asigna RUT y teléfono a través de `self.rut` y `self.telefono`: esas propiedades ejecutan sus setters, que validan y guardan los valores en `_rut` y `_telefono`. Así se conserva una única copia interna y se evita duplicar la lógica de validación.
-
-
 # Diagrama Mermaid: Servicios
 ```mermaid
 classDiagram

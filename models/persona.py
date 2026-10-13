@@ -1,6 +1,6 @@
 class Persona:
     def __init__(self, nombre: str, rut: str, telefono: str):
-        self._nombre = nombre
+        self.nombre = nombre
         self.rut = rut
         self.telefono = telefono
 

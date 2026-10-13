@@ -12,7 +12,7 @@ class Pago:
     def __init__(self, id_pago: int, fecha_pago: datetime.datetime, monto: float, metodo_pago: MetodosPago):
         self._id_pago = id_pago
         self._fecha_pago = fecha_pago
-        self._monto = monto
+        self.monto = monto
         self._metodo_pago = metodo_pago
 
     @property

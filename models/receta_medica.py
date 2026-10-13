@@ -5,8 +5,8 @@ class RecetaMedica:
     def __init__(self, id_receta: int, nombre_comercial: str, cantidad_mg: int, instrucciones: str):
         self.id_receta = id_receta
         self.nombre_comercial = nombre_comercial
-        self.cantidad_mg = cantidad_mg      
-        self.instrucciones = instrucciones  
+        self.cantidad_mg = cantidad_mg
+        self.instrucciones = instrucciones
 
     @property
     def id_receta(self) -> int:
@@ -68,4 +68,3 @@ class RecetaMedica:
             f"Receta #{self.id_receta} - {self.nombre_comercial} ({self.cantidad_mg}mg)\n"
             f"Instrucciones: {self.instrucciones}"
         )
-
