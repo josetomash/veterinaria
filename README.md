@@ -386,125 +386,6 @@ classDiagram
 ```
 
 
-# Diagrama Mermaid: persistencia_daos
-```mermaid
-classDiagram
-    direction LR
-
-    class ConexionDB {
-        + ConstructorConexionDB(ruta_db: str) void
-        - _ruta_db str
-        + obtener_conexion() ContextManager~Connection~
-    }
-    note for ConexionDB "Se inyecta en el constructor de los 9 DAO (atributo _db)"
-
-    class MascotaDAO {
-        + ConstructorMascotaDAO(conexion_db: ConexionDB) void
-        - _db ConexionDB
-        + crear_tabla() void
-        + insertar(mascota: Mascota) void
-        - _crear_mascota(fila: tuple) Mascota
-        + obtener_por_id_estricto(id_mascota: int) Mascota
-        + listar_todos() list~Mascota~
-        + actualizar(mascota: Mascota) bool
-        + eliminar(id_mascota: int) bool
-    }
-
-    class PropietarioDAO {
-        + ConstructorPropietarioDAO(conexion_db: ConexionDB) void
-        - _db ConexionDB
-        + crear_tabla() void
-        + insertar(propietario: Propietario) void
-        - _crear_propietario(fila_propietario: tuple, fila_mascota: tuple) Propietario
-        + obtener_por_id_estricto(id_propietario: int) Propietario
-        + listar_todos() list~Propietario~
-        + actualizar(propietario: Propietario) bool
-        + eliminar(id_propietario: int) bool
-    }
-
-    class VeterinarioDAO {
-        + ConstructorVeterinarioDAO(conexion_db: ConexionDB) void
-        - _db ConexionDB
-        + crear_tabla() void
-        + insertar(veterinario: Veterinario) void
-        + obtener_por_id_estricto(id_veterinario: int) Veterinario
-        + listar_todos() list~Veterinario~
-        + actualizar(veterinario: Veterinario) bool
-        + eliminar(id_veterinario: int) bool
-    }
-
-    class ConsultaDAO {
-        + ConstructorConsultaDAO(conexion_db: ConexionDB) void
-        - _db ConexionDB
-        + crear_tabla() void
-        + insertar(consulta: Consulta) void
-        + obtener_por_id_estricto(id_consulta: int) Consulta
-        + listar_todos() list~Consulta~
-        + actualizar(consulta: Consulta) bool
-        + eliminar(id_consulta: int) bool
-    }
-
-    class DetalleConsultaDAO {
-        + ConstructorDetalleConsultaDAO(conexion_db: ConexionDB) void
-        - _db ConexionDB
-        + crear_tabla() void
-        + insertar(detalle: DetalleConsulta) void
-        - _crear_detalle(fila_detalle: tuple, fila_receta: tuple) DetalleConsulta
-        + obtener_por_id_estricto(id_detalle: int) DetalleConsulta
-        + listar_todos() list~DetalleConsulta~
-        + actualizar(detalle: DetalleConsulta) bool
-        + eliminar(id_detalle: int) bool
-    }
-
-    class RecetaMedicaDAO {
-        + ConstructorRecetaMedicaDAO(conexion_db: ConexionDB) void
-        - _db ConexionDB
-        + crear_tabla() void
-        + insertar(receta: RecetaMedica) void
-        + obtener_por_id_estricto(id_receta: int) RecetaMedica
-        + listar_todos() list~RecetaMedica~
-        + actualizar(receta: RecetaMedica) bool
-        + eliminar(id_receta: int) bool
-    }
-
-    class MedicamentoDAO {
-        + ConstructorMedicamentoDAO(conexion_db: ConexionDB) void
-        - _db ConexionDB
-        - _crear_medicamento(fila: tuple) Medicamento
-        + crear_tabla() void
-        + insertar(medicamento: Medicamento) void
-        + obtener_por_id_estricto(id_medicamento: int) Medicamento
-        + listar_todos() list~Medicamento~
-        + buscar_por_termino_seguro(termino: str) list~Medicamento~
-        + actualizar(medicamento: Medicamento) bool
-        + eliminar(id_medicamento: int) bool
-        + actualizar_stock_seguro(id_medicamento: int, nuevo_stock: int) bool
-    }
-
-    class EspecieDAO {
-        + ConstructorEspecieDAO(conexion_db: ConexionDB) void
-        - _db ConexionDB
-        + crear_tabla() void
-        + insertar(especie: Especie) void
-        + obtener_por_id_estricto(id_especie: int) Especie
-        + listar_todos() list~Especie~
-        + actualizar(especie: Especie) bool
-        + eliminar(id_especie: int) bool
-    }
-
-    class EspecialidadDAO {
-        + ConstructorEspecialidadDAO(conexion_db: ConexionDB) void
-        - _db ConexionDB
-        + crear_tabla() void
-        + insertar(especialidad: Especialidad) void
-        + obtener_por_nombre_estricto(nombre: str) Especialidad
-        + listar_todos() list~Especialidad~
-        + actualizar(especialidad: Especialidad, nombre_anterior: str) bool
-        + eliminar(nombre: str) bool
-    }
-```
-
-
 # Diagrama Mermaid: Servicios
 ```mermaid
 classDiagram
@@ -576,6 +457,38 @@ classDiagram
         + registrar_especialidad(especialidad: Especialidad) Especialidad
     }
 
+    class ConexionDB {
+        - _ruta_db str
+    }
+
+    class MascotaDAO {
+        - _db ConexionDB
+    }
+    class PropietarioDAO {
+        - _db ConexionDB
+    }
+    class VeterinarioDAO {
+        - _db ConexionDB
+    }
+    class ConsultaDAO {
+        - _db ConexionDB
+    }
+    class DetalleConsultaDAO {
+        - _db ConexionDB
+    }
+    class RecetaMedicaDAO {
+        - _db ConexionDB
+    }
+    class MedicamentoDAO {
+        - _db ConexionDB
+    }
+    class EspecieDAO {
+        - _db ConexionDB
+    }
+    class EspecialidadDAO {
+        - _db ConexionDB
+    }
+
     MascotaService --> MascotaDAO : DAO
     PropietarioService --> PropietarioDAO : DAO
     VeterinarioService --> VeterinarioDAO : DAO
@@ -585,6 +498,16 @@ classDiagram
     MedicamentoService --> MedicamentoDAO : DAO
     EspecieService --> EspecieDAO : DAO
     EspecialidadService --> EspecialidadDAO : DAO
+
+    ConexionDB <-- MascotaDAO : conexion
+    ConexionDB <-- PropietarioDAO : conexion
+    ConexionDB <-- VeterinarioDAO : conexion
+    ConexionDB <-- ConsultaDAO : conexion
+    ConexionDB <-- DetalleConsultaDAO : conexion
+    ConexionDB <-- RecetaMedicaDAO : conexion
+    ConexionDB <-- MedicamentoDAO : conexion
+    ConexionDB <-- EspecieDAO : conexion
+    ConexionDB <-- EspecialidadDAO : conexion
 ```
 
 # Diagrama Mermaid: Menus Consulta
