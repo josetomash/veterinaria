@@ -127,7 +127,7 @@ Cada operación usa `obtener_conexion()` para confirmar los cambios al terminar
 o revertirlos si ocurre un error. La base nueva se guarda en
 `database/clinica_vetcare.db`.
 
-# Flujo de registro de un propietario
+## Flujo de registro de un propietario
 
 Al registrar un propietario, el menú recoge los datos y construye el objeto
 `Propietario`. Después, la llamada sigue este recorrido:
