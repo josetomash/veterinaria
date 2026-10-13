@@ -127,7 +127,7 @@ Cada operación usa `obtener_conexion()` para confirmar los cambios al terminar
 o revertirlos si ocurre un error. La base nueva se guarda en
 `database/clinica_vetcare.db`.
 
-### Flujo de registro de un propietario
+# Flujo de registro de un propietario
 
 Al registrar un propietario, el menú recoge los datos y construye el objeto
 `Propietario`. Después, la llamada sigue este recorrido:
@@ -142,6 +142,23 @@ Al registrar un propietario, el menú recoge los datos y construye el objeto
 4. Si todo termina correctamente, `obtener_conexion()` confirma la transacción
    con `commit`; si ocurre un error, la revierte con `rollback`.
 
+Agente: GPT-6 Luna | Copilot
+
+
+# Manejo de una mascota cuyo ID ya existe
+
+Antes de insertar el propietario, `PropietarioDAO.insertar()` guarda la mascota
+con un `INSERT ... ON CONFLICT(id_mascota) DO UPDATE`. Si no existe una mascota
+con ese ID, la inserta; si ya existe, actualiza su nombre, fecha de nacimiento
+y especie en lugar de intentar crear una segunda fila con la misma clave
+primaria.
+
+Como el DAO procesa primero la especie y la mascota, y luego inserta el
+propietario con ese mismo `id_mascota`, la referencia del propietario apunta a
+una fila de mascota existente y satisface la clave foránea. Esta lógica no solo
+reutiliza la mascota sin cambios: cuando el ID ya existe, sobrescribe sus datos
+con los del objeto recibido.
+
 Hay dos métodos distintos llamados `_crear_propietario`. El del menú crea el
 objeto a partir de los datos ingresados por el usuario. El de `PropietarioDAO`
 reconstruye un objeto a partir de filas obtenidas de la base de datos (por
@@ -149,7 +166,6 @@ ejemplo, al listar o buscar propietarios), no inserta datos.
 
  El de `PropietarioDAO` se usa para instanciar nuevamente el objeto que creo el usuario para mostrarlo, cuando el programa consulta un propietario que ya esta guardado ese metodo reconstruye el bojeto en memoria para que luego el programa pueda mostrarlo o usar esos datos.
 
-Agente: GPT-6 Luna | Copilot
 
 ## Diagrama UML de clases
 
