@@ -159,14 +159,6 @@ una fila de mascota existente y satisface la clave foránea. Esta lógica no sol
 reutiliza la mascota sin cambios: cuando el ID ya existe, sobrescribe sus datos
 con los del objeto recibido.
 
-Hay dos métodos distintos llamados `_crear_propietario`. El del menú crea el
-objeto a partir de los datos ingresados por el usuario. El de `PropietarioDAO`
-reconstruye un objeto a partir de filas obtenidas de la base de datos (por
-ejemplo, al listar o buscar propietarios), no inserta datos.
-
- El de `PropietarioDAO` se usa para instanciar nuevamente el objeto que creo el usuario para mostrarlo, cuando el programa consulta un propietario que ya esta guardado ese metodo reconstruye el bojeto en memoria para que luego el programa pueda mostrarlo o usar esos datos.
-
-
 ## Diagrama UML de clases
 
 Uso de IA para generacion base del diagrama: Use IA para generar el diagrama BASE de clase UML
