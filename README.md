@@ -140,11 +140,12 @@ en el readme integra en mermaid.js un diagrama de clases UML que tenga clases, a
 Los atributos todos ponlos privados como debe ser "-" al tener "_" en python y los metodos dependeran del metodo. Recorda que el tipo de visibilidad viene primero luego el atributo y luego del atributo viene el tipo de dato. Los metodos pasa lo mismo con el tipo de dato, en este caso si no devuelve nada ponle void.
 
 ej: 
+```
 atributo
 - id_mascota : int
 metodo
 + calcular_edad() : int 
-
+```
 Aparte de eso en los atributos el primero debe ser si o si el constructor el constructor debe ser el nombre de la clase junto a constructor ej:
 
 clase mascota
