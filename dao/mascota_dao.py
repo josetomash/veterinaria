@@ -47,8 +47,18 @@ class MascotaDAO:
             conn.execute(sql, parametros_mascota)
 
     def _crear_mascota(self, fila) -> Mascota:
-        especie = next(especie for especie in Especie if especie.id_especie == fila[3])
-        return Mascota(fila[0], fila[1], date.fromisoformat(fila[2]), especie)
+        # Tupla: (id_mascota, nombre, fecha_nacimiento, id_especie)
+        especie = next(
+            especie
+            for especie in Especie
+            if especie.id_especie == fila[3]
+        )
+        return Mascota(
+            fila[0],
+            fila[1],
+            date.fromisoformat(fila[2]),
+            especie,
+        )
 
     def obtener_por_id_estricto(self, id_mascota: int) -> Mascota:
         sql = "SELECT id_mascota, nombre, fecha_nacimiento, id_especie FROM mascotas WHERE id_mascota = ?"
@@ -60,9 +70,27 @@ class MascotaDAO:
 
     def listar_todos(self) -> list[Mascota]:
         sql = "SELECT id_mascota, nombre, fecha_nacimiento, id_especie FROM mascotas ORDER BY nombre"
+        mascotas = []
         with self._db.obtener_conexion() as conn:
-            filas = conn.execute(sql).fetchall()
-        return [self._crear_mascota(fila) for fila in filas]
+            cursor = conn.cursor()
+            cursor.execute(sql)
+            filas = cursor.fetchall()
+
+            for fila in filas:
+                # Tupla: (id_mascota, nombre, fecha_nacimiento, id_especie)
+                especie = next(
+                    especie
+                    for especie in Especie
+                    if especie.id_especie == fila[3]
+                )
+                mascota = Mascota(
+                    fila[0],
+                    fila[1],
+                    date.fromisoformat(fila[2]),
+                    especie,
+                )
+                mascotas.append(mascota)
+        return mascotas
 
     def actualizar(self, mascota: Mascota) -> bool:
         sql = """

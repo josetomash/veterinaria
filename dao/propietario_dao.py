@@ -75,36 +75,82 @@ class PropietarioDAO:
             conn.execute(sql_mascota, parametros_mascota)
             conn.execute(sql, parametros)
 
-    def _crear_propietario(self, fila) -> Propietario:
-        especie = next(especie for especie in Especie if especie.id_especie == fila[8])
-        mascota = Mascota(fila[5], fila[6], date.fromisoformat(fila[7]), especie)
-        return Propietario(fila[1], fila[2], fila[3], fila[0], fila[4], mascota)
+    def _crear_propietario(self, fila_propietario, fila_mascota) -> Propietario:
+        # Tuplas:
+        # fila_propietario=(id_propietario, nombre, rut, telefono, email, id_mascota);
+        # fila_mascota=(id_mascota, nombre, fecha_nacimiento, id_especie)
+        especie = next(
+            especie
+            for especie in Especie
+            if especie.id_especie == fila_mascota[3]
+        )
+        mascota = Mascota(
+            fila_mascota[0],
+            fila_mascota[1],
+            date.fromisoformat(fila_mascota[2]),
+            especie,
+        )
+        return Propietario(
+            fila_propietario[1],
+            fila_propietario[2],
+            fila_propietario[3],
+            fila_propietario[0],
+            fila_propietario[4],
+            mascota,
+        )
 
     def obtener_por_id_estricto(self, id_propietario: int) -> Propietario:
-        sql = """
-            SELECT p.id_propietario, p.nombre, p.rut, p.telefono, p.email,
-                   m.id_mascota, m.nombre, m.fecha_nacimiento, m.id_especie
-            FROM propietarios AS p
-            JOIN mascotas AS m ON m.id_mascota = p.id_mascota
-            WHERE p.id_propietario = ?
+        sql_propietario = """
+            SELECT id_propietario, nombre, rut, telefono, email, id_mascota
+            FROM propietarios
+            WHERE id_propietario = ?
+        """
+        sql_mascota = """
+            SELECT id_mascota, nombre, fecha_nacimiento, id_especie
+            FROM mascotas
+            WHERE id_mascota = ?
         """
         with self._db.obtener_conexion() as conn:
-            fila = conn.execute(sql, (id_propietario,)).fetchone()
-        if fila is None:
-            raise ValueError(f"No existe el propietario con ID {id_propietario}.")
-        return self._crear_propietario(fila)
+            fila_propietario = conn.execute(sql_propietario, (id_propietario,)).fetchone()
+            if fila_propietario is None:
+                raise ValueError(f"No existe el propietario con ID {id_propietario}.")
+            # Tupla: (id_propietario, nombre, rut, telefono, email, id_mascota)
+            fila_mascota = conn.execute(sql_mascota, (fila_propietario[5],)).fetchone()
+        if fila_mascota is None:
+            raise ValueError(
+                f"No se encontró la mascota asociada al propietario con ID {id_propietario}."
+            )
+        return self._crear_propietario(fila_propietario, fila_mascota)
 
     def listar_todos(self) -> list[Propietario]:
-        sql = """
-            SELECT p.id_propietario, p.nombre, p.rut, p.telefono, p.email,
-                   m.id_mascota, m.nombre, m.fecha_nacimiento, m.id_especie
-            FROM propietarios AS p
-            JOIN mascotas AS m ON m.id_mascota = p.id_mascota
-            ORDER BY p.nombre
+        sql_propietarios = """
+            SELECT id_propietario, nombre, rut, telefono, email, id_mascota
+            FROM propietarios
+            ORDER BY nombre
         """
+        sql_mascota = """
+            SELECT id_mascota, nombre, fecha_nacimiento, id_especie
+            FROM mascotas
+            WHERE id_mascota = ?
+        """
+        propietarios = []
         with self._db.obtener_conexion() as conn:
-            filas = conn.execute(sql).fetchall()
-        return [self._crear_propietario(fila) for fila in filas]
+            cursor = conn.cursor()
+            cursor.execute(sql_propietarios)
+            filas_propietarios = cursor.fetchall()
+
+            for fila_propietario in filas_propietarios:
+                # Tupla: (id_propietario, nombre, rut, telefono, email, id_mascota)
+                cursor.execute(sql_mascota, (fila_propietario[5],))
+                fila_mascota = cursor.fetchone()
+                if fila_mascota is None:
+                    raise ValueError(
+                        "No se encontró la mascota asociada al propietario "
+                        # Tupla fila_propietario: (id_propietario, nombre, rut, telefono, email, id_mascota)
+                        f"con ID {fila_propietario[0]}."
+                    )
+                propietarios.append(self._crear_propietario(fila_propietario, fila_mascota))
+        return propietarios
 
     def actualizar(self, propietario: Propietario) -> bool:
         sql = """

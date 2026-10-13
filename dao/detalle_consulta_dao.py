@@ -30,35 +30,69 @@ class DetalleConsultaDAO:
         with self._db.obtener_conexion() as conn:
             conn.execute(sql, parametros)
 
-    def _crear_detalle(self, fila) -> DetalleConsulta:
-        receta = RecetaMedica(fila[3], fila[4], fila[5], fila[6])
-        return DetalleConsulta(fila[0], fila[1], fila[2], receta)
+    def _crear_detalle(self, fila_detalle, fila_receta) -> DetalleConsulta:
+        # Tuplas: fila_detalle=(id_detalle, diagnostico, tratamiento, id_receta);
+        # fila_receta=(id_receta, nombre_comercial, cantidad_mg, instrucciones)
+        receta = RecetaMedica(*fila_receta)
+        return DetalleConsulta(
+            fila_detalle[0],
+            fila_detalle[1],
+            fila_detalle[2],
+            receta,
+        )
 
     def obtener_por_id_estricto(self, id_detalle: int) -> DetalleConsulta:
-        sql = """
-            SELECT d.id_detalle, d.diagnostico, d.tratamiento,
-                   r.id_receta, r.nombre_comercial, r.cantidad_mg, r.instrucciones
-            FROM detalle_consulta AS d
-            JOIN receta_medica AS r ON r.id_receta = d.id_receta
-            WHERE d.id_detalle = ?
+        sql_detalle = """
+            SELECT id_detalle, diagnostico, tratamiento, id_receta
+            FROM detalle_consulta
+            WHERE id_detalle = ?
+        """
+        sql_receta = """
+            SELECT id_receta, nombre_comercial, cantidad_mg, instrucciones
+            FROM receta_medica
+            WHERE id_receta = ?
         """
         with self._db.obtener_conexion() as conn:
-            fila = conn.execute(sql, (id_detalle,)).fetchone()
-        if fila is None:
-            raise ValueError(f"No existe el detalle de consulta con ID {id_detalle}.")
-        return self._crear_detalle(fila)
+            fila_detalle = conn.execute(sql_detalle, (id_detalle,)).fetchone()
+            if fila_detalle is None:
+                raise ValueError(f"No existe el detalle de consulta con ID {id_detalle}.")
+            # Tupla: (id_detalle, diagnostico, tratamiento, id_receta)
+            fila_receta = conn.execute(sql_receta, (fila_detalle[3],)).fetchone()
+        if fila_receta is None:
+            raise ValueError(
+                f"No se encontró la receta asociada al detalle de consulta con ID {id_detalle}."
+            )
+        return self._crear_detalle(fila_detalle, fila_receta)
 
     def listar_todos(self) -> list[DetalleConsulta]:
-        sql = """
-            SELECT d.id_detalle, d.diagnostico, d.tratamiento,
-                   r.id_receta, r.nombre_comercial, r.cantidad_mg, r.instrucciones
-            FROM detalle_consulta AS d
-            JOIN receta_medica AS r ON r.id_receta = d.id_receta
-            ORDER BY d.id_detalle
+        sql_detalles = """
+            SELECT id_detalle, diagnostico, tratamiento, id_receta
+            FROM detalle_consulta
+            ORDER BY id_detalle
         """
+        sql_receta = """
+            SELECT id_receta, nombre_comercial, cantidad_mg, instrucciones
+            FROM receta_medica
+            WHERE id_receta = ?
+        """
+        detalles = []
         with self._db.obtener_conexion() as conn:
-            filas = conn.execute(sql).fetchall()
-        return [self._crear_detalle(fila) for fila in filas]
+            cursor = conn.cursor()
+            cursor.execute(sql_detalles)
+            filas_detalle = cursor.fetchall()
+
+            for fila_detalle in filas_detalle:
+                # Tupla: (id_detalle, diagnostico, tratamiento, id_receta)
+                cursor.execute(sql_receta, (fila_detalle[3],))
+                fila_receta = cursor.fetchone()
+                if fila_receta is None:
+                    raise ValueError(
+                        "No se encontró la receta asociada al detalle de consulta "
+                        # Tupla fila_detalle: (id_detalle, diagnostico, tratamiento, id_receta)
+                        f"con ID {fila_detalle[0]}."
+                    )
+                detalles.append(self._crear_detalle(fila_detalle, fila_receta))
+        return detalles
 
     def actualizar(self, detalle: DetalleConsulta) -> bool:
         sql = """

@@ -38,7 +38,13 @@ class RecetaMedicaDAO:
             fila = conn.execute(sql, (id_receta,)).fetchone()
         if fila is None:
             raise ValueError(f"No existe la receta médica con ID {id_receta}.")
-        return RecetaMedica(*fila)
+        # Tupla: (id_receta, nombre_comercial, cantidad_mg, instrucciones)
+        return RecetaMedica(
+            fila[0],
+            fila[1],
+            fila[2],
+            fila[3],
+        )
 
     def listar_todos(self) -> list[RecetaMedica]:
         sql = """
@@ -46,9 +52,22 @@ class RecetaMedicaDAO:
             FROM receta_medica
             ORDER BY nombre_comercial
         """
+        recetas = []
         with self._db.obtener_conexion() as conn:
-            filas = conn.execute(sql).fetchall()
-        return [RecetaMedica(*fila) for fila in filas]
+            cursor = conn.cursor()
+            cursor.execute(sql)
+            filas = cursor.fetchall()
+
+            for fila in filas:
+                # Tupla: (id_receta, nombre_comercial, cantidad_mg, instrucciones)
+                receta = RecetaMedica(
+                    fila[0],
+                    fila[1],
+                    fila[2],
+                    fila[3],
+                )
+                recetas.append(receta)
+        return recetas
 
     def actualizar(self, receta: RecetaMedica) -> bool:
         sql = """

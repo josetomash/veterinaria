@@ -27,13 +27,22 @@ class EspecialidadDAO:
             fila = conn.execute(sql, (nombre,)).fetchone()
         if fila is None:
             raise ValueError(f"No existe la especialidad '{nombre}'.")
+        # Tupla: (nombre,)
         return Especialidad(fila[0])
 
     def listar_todos(self) -> list[Especialidad]:
         sql = "SELECT nombre FROM especialidades ORDER BY nombre"
+        especialidades = []
         with self._db.obtener_conexion() as conn:
-            filas = conn.execute(sql).fetchall()
-        return [Especialidad(fila[0]) for fila in filas]
+            cursor = conn.cursor()
+            cursor.execute(sql)
+            filas = cursor.fetchall()
+
+            for fila in filas:
+                # Tupla: (nombre,)
+                especialidad = Especialidad(fila[0])
+                especialidades.append(especialidad)
+        return especialidades
 
     def actualizar(self, especialidad: Especialidad, nombre_anterior: str) -> bool:
         sql = "UPDATE especialidades SET nombre = ? WHERE nombre = ?"

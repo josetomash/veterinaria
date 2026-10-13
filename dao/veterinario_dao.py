@@ -52,7 +52,15 @@ class VeterinarioDAO:
             fila = conn.execute(sql, (id_veterinario,)).fetchone()
         if fila is None:
             raise ValueError(f"No existe el veterinario con ID {id_veterinario}.")
-        return Veterinario(*fila[:5], Especialidad(fila[5]))
+        # Tupla: (id_persona, nombre, rut, telefono, id_veterinario, especialidad)
+        return Veterinario(
+            fila[0],
+            fila[1],
+            fila[2],
+            fila[3],
+            fila[4],
+            Especialidad(fila[5]),
+        )
 
     def listar_todos(self) -> list[Veterinario]:
         sql = """
@@ -60,9 +68,24 @@ class VeterinarioDAO:
             FROM veterinarios
             ORDER BY nombre
         """
+        veterinarios = []
         with self._db.obtener_conexion() as conn:
-            filas = conn.execute(sql).fetchall()
-        return [Veterinario(*fila[:5], Especialidad(fila[5])) for fila in filas]
+            cursor = conn.cursor()
+            cursor.execute(sql)
+            filas = cursor.fetchall()
+
+            for fila in filas:
+                # Tupla: (id_persona, nombre, rut, telefono, id_veterinario, especialidad)
+                veterinario = Veterinario(
+                    fila[0],
+                    fila[1],
+                    fila[2],
+                    fila[3],
+                    fila[4],
+                    Especialidad(fila[5]),
+                )
+                veterinarios.append(veterinario)
+        return veterinarios
 
     def actualizar(self, veterinario: Veterinario) -> bool:
         sql = """

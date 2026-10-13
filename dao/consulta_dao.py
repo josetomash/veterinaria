@@ -54,7 +54,15 @@ class ConsultaDAO:
             fila = conn.execute(sql, (id_consulta,)).fetchone()
         if fila is None:
             raise ValueError(f"No existe la consulta con ID {id_consulta}.")
-        return Consulta(fila[0], fila[1], date.fromisoformat(fila[2]), fila[3], fila[4], fila[5])
+        # Tupla: (id_consulta, motivo, fecha, veterinario_id, id_mascota, propietario_id)
+        return Consulta(
+            fila[0],
+            fila[1],
+            date.fromisoformat(fila[2]),
+            fila[3],
+            fila[4],
+            fila[5],
+        )
 
     def listar_todos(self) -> list[Consulta]:
         sql = """
@@ -62,12 +70,24 @@ class ConsultaDAO:
             FROM consulta
             ORDER BY fecha DESC
         """
+        consultas = []
         with self._db.obtener_conexion() as conn:
-            filas = conn.execute(sql).fetchall()
-        return [
-            Consulta(fila[0], fila[1], date.fromisoformat(fila[2]), fila[3], fila[4], fila[5])
-            for fila in filas
-        ]
+            cursor = conn.cursor()
+            cursor.execute(sql)
+            filas = cursor.fetchall()
+
+            for fila in filas:
+                # Tupla: (id_consulta, motivo, fecha, veterinario_id, id_mascota, propietario_id)
+                consulta = Consulta(
+                    fila[0],
+                    fila[1],
+                    date.fromisoformat(fila[2]),
+                    fila[3],
+                    fila[4],
+                    fila[5],
+                )
+                consultas.append(consulta)
+        return consultas
 
     def actualizar(self, consulta: Consulta) -> bool:
         sql = """

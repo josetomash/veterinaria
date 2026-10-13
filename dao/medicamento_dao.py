@@ -7,6 +7,18 @@ class MedicamentoDAO:
         self._db = conexion_db
         self.crear_tabla()
 
+    @staticmethod
+    def _crear_medicamento(fila) -> Medicamento:
+        # Tupla: (id_medicamento, nombre_comercial, nombre_generico, tipo, precio, stock)
+        return Medicamento(
+            fila[0],
+            fila[1],
+            fila[2],
+            fila[3],
+            fila[4],
+            fila[5],
+        )
+
     def crear_tabla(self):
         ddl = """
             CREATE TABLE IF NOT EXISTS medicamentos (
@@ -49,7 +61,7 @@ class MedicamentoDAO:
             fila = conn.execute(sql, (id_medicamento,)).fetchone()
         if fila is None:
             raise ValueError(f"No existe el medicamento con ID {id_medicamento}.")
-        return Medicamento(*fila)
+        return self._crear_medicamento(fila)
 
     def listar_todos(self) -> list[Medicamento]:
         sql = """
@@ -57,9 +69,24 @@ class MedicamentoDAO:
             FROM medicamentos
             ORDER BY nombre_comercial
         """
+        medicamentos = []
         with self._db.obtener_conexion() as conn:
-            filas = conn.execute(sql).fetchall()
-        return [Medicamento(*fila) for fila in filas]
+            cursor = conn.cursor()
+            cursor.execute(sql)
+            filas = cursor.fetchall()
+
+            for fila in filas:
+                # Tupla: (id_medicamento, nombre_comercial, nombre_generico, tipo, precio, stock)
+                medicamento = Medicamento(
+                    fila[0],
+                    fila[1],
+                    fila[2],
+                    fila[3],
+                    fila[4],
+                    fila[5],
+                )
+                medicamentos.append(medicamento)
+        return medicamentos
 
     def buscar_por_termino_seguro(self, termino: str) -> list[Medicamento]:
         sql = """
@@ -70,7 +97,11 @@ class MedicamentoDAO:
         """
         with self._db.obtener_conexion() as conn:
             filas = conn.execute(sql, (f"%{termino}%",)).fetchall()
-        return [Medicamento(*fila) for fila in filas]
+        medicamentos = []
+        for fila in filas:
+            medicamento = self._crear_medicamento(fila)
+            medicamentos.append(medicamento)
+        return medicamentos
 
     def actualizar(self, medicamento: Medicamento) -> bool:
         sql = """

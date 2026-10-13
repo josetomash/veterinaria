@@ -33,13 +33,30 @@ class EspecieDAO:
             fila = conn.execute(sql, (id_especie,)).fetchone()
         if fila is None:
             raise ValueError(f"No existe la especie con ID {id_especie}.")
-        return next(especie for especie in Especie if especie.id_especie == fila[0])
+        # Tupla: (id_especie,)
+        return next(
+            especie
+            for especie in Especie
+            if especie.id_especie == fila[0]
+        )
 
     def listar_todos(self) -> list[Especie]:
         sql = "SELECT id_especie FROM especies ORDER BY nombre"
+        especies = []
         with self._db.obtener_conexion() as conn:
-            filas = conn.execute(sql).fetchall()
-        return [next(especie for especie in Especie if especie.id_especie == fila[0]) for fila in filas]
+            cursor = conn.cursor()
+            cursor.execute(sql)
+            filas = cursor.fetchall()
+
+            for fila in filas:
+                # Tupla: (id_especie,)
+                especie = next(
+                    especie
+                    for especie in Especie
+                    if especie.id_especie == fila[0]
+                )
+                especies.append(especie)
+        return especies
 
     def actualizar(self, especie: Especie) -> bool:
         sql = "UPDATE especies SET nombre = ?, informacion = ? WHERE id_especie = ?"
