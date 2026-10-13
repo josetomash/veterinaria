@@ -3,11 +3,17 @@ import os
 
 from models.especie import Especie
 from models.especialidad import Especialidad
+from models.detalle_consulta import DetalleConsulta
 from models.mascota import Mascota
+from models.medicamento import Medicamento
 from models.propietario import Propietario
+from models.receta_medica import RecetaMedica
 from models.veterinario import Veterinario
+from services.detalle_consulta_service import DetalleConsultaService
 from services.mascota_service import MascotaService
+from services.medicamento_service import MedicamentoService
 from services.propietario_service import PropietarioService
+from services.receta_medica_service import RecetaMedicaService
 from services.veterinario_service import VeterinarioService
 
 
@@ -17,10 +23,16 @@ class RegistrarMenu:
         propietario_service: PropietarioService,
         mascota_service: MascotaService,
         veterinario_service: VeterinarioService,
+        medicamento_service: MedicamentoService,
+        receta_medica_service: RecetaMedicaService,
+        detalle_consulta_service: DetalleConsultaService,
     ):
         self._propietario_service = propietario_service
         self._mascota_service = mascota_service
         self._veterinario_service = veterinario_service
+        self._medicamento_service = medicamento_service
+        self._receta_medica_service = receta_medica_service
+        self._detalle_consulta_service = detalle_consulta_service
 
     def mostrar_menu(self):
         print("=== Menú de Registro ===")
@@ -28,7 +40,10 @@ class RegistrarMenu:
         print("1. Asignar Propietario")
         print("2. Asignar Mascota")
         print("3. Asignar Veterinario")
-        print("4. Salir")
+        print("4. Registrar Medicamento")
+        print("5. Registrar Receta Médica")
+        print("6. Registrar Detalle de Consulta")
+        print("7. Salir")
         print("======================")
         return input("Seleccione una opción: ").strip()
 
@@ -45,6 +60,12 @@ class RegistrarMenu:
             elif opcion == "3":
                 self._registrar_veterinario()
             elif opcion == "4":
+                self._registrar_medicamento()
+            elif opcion == "5":
+                self._registrar_receta_medica()
+            elif opcion == "6":
+                self._registrar_detalle_consulta()
+            elif opcion == "7":
                 print("Saliendo del menú de registro...")
                 break
             else:
@@ -80,6 +101,36 @@ class RegistrarMenu:
             print(f"\n[Error de registro] {error}")
             input("Presione Enter para reintentar...")
 
+    def _registrar_medicamento(self):
+        try:
+            medicamento = self._crear_medicamento()
+            self._medicamento_service.registrar_medicamento(medicamento)
+            print("[OK] Registro de medicamento exitoso.")
+            input("Presione Enter para continuar...")
+        except (ValueError, TypeError) as error:
+            print(f"\n[Error de registro] {error}")
+            input("Presione Enter para reintentar...")
+
+    def _registrar_receta_medica(self):
+        try:
+            receta = self._crear_receta_medica()
+            self._receta_medica_service.registrar_receta_medica(receta)
+            print("[OK] Registro de receta médica exitoso.")
+            input("Presione Enter para continuar...")
+        except (ValueError, TypeError) as error:
+            print(f"\n[Error de registro] {error}")
+            input("Presione Enter para reintentar...")
+
+    def _registrar_detalle_consulta(self):
+        try:
+            detalle = self._crear_detalle_consulta()
+            self._detalle_consulta_service.registrar_detalle_consulta(detalle)
+            print("[OK] Registro de detalle de consulta exitoso.")
+            input("Presione Enter para continuar...")
+        except (ValueError, TypeError) as error:
+            print(f"\n[Error de registro] {error}")
+            input("Presione Enter para reintentar...")
+
     def _crear_mascota(self) -> Mascota:
         id_mascota = int(input("ID de mascota: "))
         nombre = input("Nombre de mascota: ").strip()
@@ -93,7 +144,12 @@ class RegistrarMenu:
         indice_especie = int(input("Seleccione una especie: "))
         if indice_especie < 1 or indice_especie > len(especies):
             raise ValueError("La especie seleccionada no existe.")
-        return Mascota(id_mascota, nombre, fecha_nacimiento, especies[indice_especie - 1])
+        return Mascota(
+            id_mascota,
+            nombre,
+            fecha_nacimiento,
+            especies[indice_especie - 1],
+        )
 
     def _crear_propietario(self) -> Propietario:
         mascota = self._crear_mascota()
@@ -126,4 +182,32 @@ class RegistrarMenu:
             telefono,
             id_veterinario,
             especialidades[indice_especialidad - 1],
+        )
+
+    def _crear_medicamento(self) -> Medicamento:
+        return Medicamento(
+            int(input("ID de medicamento: ")),
+            input("Nombre comercial: ").strip(),
+            input("Nombre genérico: ").strip(),
+            input("Tipo de medicamento: ").strip(),
+            float(input("Precio: ")),
+            int(input("Stock: ")),
+        )
+
+    def _crear_receta_medica(self) -> RecetaMedica:
+        return RecetaMedica(
+            int(input("ID de receta: ")),
+            input("Nombre comercial del medicamento: ").strip(),
+            int(input("Cantidad en mg: ")),
+            input("Instrucciones: ").strip(),
+        )
+
+    def _crear_detalle_consulta(self) -> DetalleConsulta:
+        id_receta = int(input("ID de la receta médica: "))
+        receta = self._receta_medica_service.obtener_receta_medica_por_id(id_receta)
+        return DetalleConsulta(
+            int(input("ID del detalle de consulta: ")),
+            input("Diagnóstico: ").strip(),
+            input("Tratamiento: ").strip(),
+            receta,
         )
