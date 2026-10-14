@@ -615,9 +615,9 @@ Esta guía resume las relaciones que **los diagramas principales de este documen
 | Área | Relaciones dibujadas | Lectura |
 |---|---|---|
 | Dominio | Herencia y asociaciones | Modela personas, mascotas, consultas, pagos y otras entidades relacionadas. |
-| Servicios y DAO | Asociaciones | Cada servicio se conecta con su DAO y cada DAO con `ConexionDB`. |
-| Menús de consulta | Asociaciones y composiciones | `MenuPrincipal` se asocia con `MenuConsulta` y se compone de `MenuBorrar` y `ActualizarMenu`. |
-| Registro y borrado | Composiciones, asociaciones y dependencia | El diagrama marca tres menús como composiciones; los menús se asocian con servicios y `RegistrarMenu` depende de `RecetaMedica` en una operación. |
+| Servicios y DAO | Asociaciones | Cada servicio se conecta con su DAO y cada DAO con ConexionDB. |
+| Menús de consulta | Asociaciones y composiciones | MenuPrincipal se asocia con MenuConsulta y se compone de MenuBorrar y ActualizarMenu. |
+| Registro y borrado | Composiciones, asociaciones y dependencia | El diagrama marca tres menús como composiciones; los menús se asocian con servicios y RegistrarMenu depende de RecetaMedica en una operación. |
 
 ### Cómo leer las relaciones
 
@@ -625,11 +625,11 @@ La forma de la línea indica el tipo de relación; la etiqueta, como «usa», «
 
 | Notación Mermaid | Tipo UML | Lectura |
 |---|---|---|
-| `<|--` | Herencia | La clase hija hereda de la clase base. |
-| `-->` | Asociación navegable | Existe un vínculo estructural entre los elementos. |
-| `*--` | Composición | El diagrama modela una relación parte–todo fuerte. |
-| `..>` | Dependencia | Un elemento usa o necesita otro para alguna operación. |
-| `o--` | Agregación | No se utiliza en los diagramas principales de este documento. |
+| &lt;&#124;-- | Herencia | La clase hija hereda de la clase base. |
+| --> | Asociación navegable | Existe un vínculo estructural entre los elementos. |
+| *-- | Composición | El diagrama modela una relación parte–todo fuerte. |
+| ..> | Dependencia | Un elemento usa o necesita otro para alguna operación. |
+| o-- | Agregación | No se utiliza en los diagramas principales de este documento. |
 
 Las multiplicidades junto a los extremos, como `1` y `0..*`, indican cuántas instancias de un extremo pueden relacionarse con una instancia del otro. Por ejemplo, `Consulta "0..*" --> "1" Veterinario` representa que cada consulta se relaciona con un veterinario y que un veterinario puede aparecer en cero o muchas consultas.
 
@@ -639,14 +639,14 @@ El [diagrama de dominio](#diagrama-mermaid-dominio) presenta entidades y sus rel
 
 | Elementos | Relación dibujada | Interpretación |
 |---|---|---|
-| `Persona`–`Propietario` | Herencia (`<|--`) | `Propietario` hereda de `Persona`. |
-| `Persona`–`Veterinario` | Herencia (`<|--`) | `Veterinario` hereda de `Persona`. |
-| `Propietario`–`Mascota` | Asociación, «tiene» | El propietario se relaciona con una mascota según las multiplicidades indicadas. |
-| `Mascota`–`Especie` | Asociación, «pertenece a» | La mascota se relaciona con una especie. |
-| `Veterinario`–`Especialidad` | Asociación, «tiene» | El veterinario se relaciona con una especialidad. |
-| `Consulta`–`Veterinario`, `Mascota` y `Propietario` | Asociaciones etiquetadas con campos ID | La consulta se relaciona con esas entidades; en el modelo Python conserva sus identificadores. |
-| `DetalleConsulta`–`RecetaMedica` | Asociación, «referencia» | El detalle mantiene una receta. |
-| `Pago`–`MetodosPago` | Asociación, «metodo_pago» | El pago se relaciona con el método de pago. |
+| Persona–Propietario | Herencia (&lt;&#124;--) | Propietario hereda de Persona. |
+| Persona–Veterinario | Herencia (&lt;&#124;--) | Veterinario hereda de Persona. |
+| Propietario–Mascota | Asociación, «tiene» | El propietario se relaciona con una mascota según las multiplicidades indicadas. |
+| Mascota–Especie | Asociación, «pertenece a» | La mascota se relaciona con una especie. |
+| Veterinario–Especialidad | Asociación, «tiene» | El veterinario se relaciona con una especialidad. |
+| Consulta–Veterinario, Mascota y Propietario | Asociaciones etiquetadas con campos ID | La consulta se relaciona con esas entidades; en el modelo Python conserva sus identificadores. |
+| DetalleConsulta–RecetaMedica | Asociación, «referencia» | El detalle mantiene una receta. |
+| Pago–MetodosPago | Asociación, «metodo_pago» | El pago se relaciona con el método de pago. |
 
 En este diagrama no se dibujan composiciones ni agregaciones. **«Referencia» es solo la etiqueta descriptiva** de la relación entre `DetalleConsulta` y `RecetaMedica`; en UML, esa relación también se considera una asociación, representada aquí con una flecha sólida (`-->`). «Referencia» no es un tipo adicional de relación UML.
 
@@ -656,8 +656,8 @@ El [diagrama de servicios](#diagrama-mermaid-servicios) muestra dos patrones de 
 
 | Patrón | Ejemplo | Significado |
 |---|---|---|
-| Servicio → DAO | `MascotaService --> MascotaDAO` | El servicio utiliza y conserva su DAO. |
-| DAO → conexión | `MascotaDAO` asociado con `ConexionDB` | El DAO utiliza y conserva la conexión a la base de datos. |
+| Servicio → DAO | MascotaService → MascotaDAO | El servicio utiliza y conserva su DAO. |
+| DAO → conexión | MascotaDAO asociado con ConexionDB | El DAO utiliza y conserva la conexión a la base de datos. |
 
 El mismo patrón servicio–DAO y DAO–`ConexionDB` se repite para Propietario, Veterinario, Consulta, DetalleConsulta, RecetaMedica, Medicamento, Especie y Especialidad. En este diagrama no se dibujan herencias, composiciones ni dependencias.
 
@@ -667,11 +667,11 @@ El [diagrama de menús de consulta](#diagrama-mermaid-menus-consulta) muestra:
 
 | Relación | Notación y etiqueta | Interpretación |
 |---|---|---|
-| `MenuPrincipal`–`MenuConsulta` | Asociación (`-->`), «abre» | El principal conserva y ejecuta el menú de consulta. |
-| `MenuPrincipal`–`MenuBorrar` | Composición (`*--`), «crea» | El diagrama modela el menú de borrado como parte de `MenuPrincipal`. |
-| `MenuPrincipal`–`ActualizarMenu` | Composición (`*--`), «crea» | El diagrama modela el menú de actualización como parte de `MenuPrincipal`. |
-| `MenuBorrar`–sus siete servicios | Asociaciones (`-->`), «usa» | `MenuBorrar` utiliza los servicios indicados en el diagrama. |
-| `MenuConsulta`–sus ocho servicios | Asociaciones (`-->`), «usa» | `MenuConsulta` utiliza los servicios indicados en el diagrama. |
+| MenuPrincipal–MenuConsulta | Asociación (-->), «abre» | El principal conserva y ejecuta el menú de consulta. |
+| MenuPrincipal–MenuBorrar | Composición (*--), «crea» | El diagrama modela el menú de borrado como parte de MenuPrincipal. |
+| MenuPrincipal–ActualizarMenu | Composición (*--), «crea» | El diagrama modela el menú de actualización como parte de MenuPrincipal. |
+| MenuBorrar–sus siete servicios | Asociaciones (-->), «usa» | MenuBorrar utiliza los servicios indicados en el diagrama. |
+| MenuConsulta–sus ocho servicios | Asociaciones (-->), «usa» | MenuConsulta utiliza los servicios indicados en el diagrama. |
 
 ### 3.1. Por qué `MenuConsulta` se dibuja distinto
 
@@ -693,12 +693,12 @@ El [diagrama de registro y borrado](#diagrama-mermaid-menus-registro-y-borrado) 
 
 | Relación | Notación y etiqueta | Interpretación |
 |---|---|---|
-| `MenuPrincipal`–`RegistrarMenu` | Composición (`*--`), «crea temporalmente» | El diagrama lo representa como parte de `MenuPrincipal`. |
-| `MenuPrincipal`–`MenuBorrar` y `ActualizarMenu` | Composición (`*--`) | El diagrama los representa como partes de `MenuPrincipal`. |
-| `MenuBorrar`–sus siete servicios | Asociaciones (`-->`), «usa» | El menú utiliza los servicios indicados. |
-| `RegistrarMenu`–sus seis servicios | Asociaciones (`-->`), «usa» | El menú de registro utiliza los servicios indicados. |
-| `ActualizarMenu`–sus siete servicios | Asociaciones (`-->`), «usa» | El menú de actualización utiliza los servicios indicados. |
-| `RegistrarMenu`–`RecetaMedica` | Dependencia (`..>`), «solicita receta para el detalle» | Al crear un detalle, el menú obtiene una receta y la entrega a `DetalleConsulta`. |
+| MenuPrincipal–RegistrarMenu | Composición (*--), «crea temporalmente» | El diagrama lo representa como parte de MenuPrincipal. |
+| MenuPrincipal–MenuBorrar y ActualizarMenu | Composición (*--) | El diagrama los representa como partes de MenuPrincipal. |
+| MenuBorrar–sus siete servicios | Asociaciones (-->), «usa» | El menú utiliza los servicios indicados. |
+| RegistrarMenu–sus seis servicios | Asociaciones (-->), «usa» | El menú de registro utiliza los servicios indicados. |
+| ActualizarMenu–sus siete servicios | Asociaciones (-->), «usa» | El menú de actualización utiliza los servicios indicados. |
+| RegistrarMenu–RecetaMedica | Dependencia (..>), «solicita receta para el detalle» | Al crear un detalle, el menú obtiene una receta y la entrega a DetalleConsulta. |
 
 En el código, `RegistrarMenu` se instancia dentro de `MenuPrincipal.mostrar_menu()`, se ejecuta y no se guarda en un atributo. La notación `*--` es la relación que eligió el diagrama; que la creación sea temporal no prueba por sí sola la semántica de ciclo de vida propia de una composición.
 
