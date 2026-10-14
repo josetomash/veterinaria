@@ -650,7 +650,7 @@ El [diagrama de dominio](#diagrama-mermaid-dominio) presenta entidades y sus rel
 | Propietario–Mascota | Asociación, «tiene» | El propietario se relaciona con una mascota según las multiplicidades indicadas. |
 | Mascota–Especie | Asociación, «pertenece a» | La mascota se relaciona con una especie. |
 | Veterinario–Especialidad | Asociación, «tiene» | El veterinario se relaciona con una especialidad. |
-| Consulta–Veterinario, Mascota y Propietario | Asociaciones etiquetadas con campos ID | La consulta se relaciona con esas entidades; en el modelo Python conserva sus identificadores. |
+| Consulta–Veterinario, Mascota y Propietario | Asociaciones etiquetadas con campos ID | La consulta se relaciona con esas entidades, en el modelo Python conserva sus identificadores. |
 | DetalleConsulta–Consulta | Asociación, «pertenece a» | Cada detalle se vincula a una consulta y, a través de ella, a la mascota atendida y al veterinario tratante. |
 | DetalleConsulta–RecetaMedica | Asociación, «referencia» | El detalle mantiene una receta. |
 | RecetaMedica–Veterinario | Asociación, «prescrita por» | La receta identifica directamente al veterinario que la prescribe. |
