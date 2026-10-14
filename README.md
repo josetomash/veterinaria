@@ -360,11 +360,13 @@ def borrar_especie(self, id_especie: int) -> bool:
 
 Me di la tarea de validar el codigo generado por la IA 
 Lo primero que me causo ruido fue sobre ingenieria en:
+```py
 _borrar_por_id(self, entidad: str, accion: Callable[[int], bool]) -> None:
-
+```
 se cambio a:
+```py
     def _borrar_por_id(self, entidad, accion):
-
+```
 Muchas más legible, sacrificando TypeHints innecesarios que dificultaban la lectura del grupo.
 
 Más haya de eso, los DAO ya tenian implementados el metodo borrar por ID, asi que la IA simplemente funciono de conector, agilizando trabajo repetitivo de tener que modificar cada .service con un metodo borrar y este llamar al DAO para borrar ese registro.
