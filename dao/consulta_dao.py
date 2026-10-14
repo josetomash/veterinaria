@@ -12,7 +12,7 @@ class ConsultaDAO:
     def crear_tabla(self):
         ddl = """
             CREATE TABLE IF NOT EXISTS consulta (
-                id_consulta INTEGER PRIMARY KEY,
+                id_consulta INTEGER PRIMARY KEY AUTOINCREMENT,
                 id_mascota INTEGER NOT NULL,
                 fecha TEXT NOT NULL,
                 motivo TEXT NOT NULL,
@@ -25,7 +25,6 @@ class ConsultaDAO:
         """
         with self._db.obtener_conexion() as conn:
             conn.execute(ddl)
-            self._db.migrar_tabla_sin_autoincrement(conn, "consulta")
 
     def insertar(self, consulta: Consulta) -> None:
         sql = """

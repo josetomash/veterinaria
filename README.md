@@ -2,6 +2,181 @@
 
 Sistema de consola para gestionar una clínica veterinaria (propietarios, mascotas, veterinarios, consultas, detalles de consulta, recetas médicas y medicamentos) hecho en Python con SQLite.
 
+# Resumen de Cambios - VetCare (Versión v5 / Rama `brayan`)
+
+Este apartado detalla todas las modificaciones, correcciones e implementaciones técnicas realizadas en el proyecto **VetCare** que se hicieron en la rama brayan y luego se trayeron a main con un merge/fusion.
+
+---
+
+## 1. Visión General del Trabajo Realizado
+
+Los cambios se estructuraron respetando la arquitectura por capas del proyecto (`models`, `dao`, `services`, `screens`):
+
+* **Archivo nuevo creado:** `screens/utilidades.py`.
+
+
+* **Archivos modificados:** Todos los modelos con ID, 8 de los 9 DAO (salvo `especialidad_dao.py`), 7 servicios, los 5 menús de la capa `screens`, `main.py` y el `README.md`.
+
+
+---
+
+## 2. Detalle de los 10 Cambios Clave
+
+### 1. Búsquedas por RUT y por Nombre
+
+
+
+* Se reemplazó la búsqueda generalizada por ID en el menú de consultas.
+
+
+* **RUT:** Comparación mediante normalización (método `Persona.normalizar_rut()`), permitiendo escribir RUTs con o sin puntos y guion (ej. `11.111.111-1` o `111111111`).
+
+
+* **Nombres:** Búsqueda parcial de texto (ej. "amoxi" encuentra "Amoxicilina 250mg").
+
+
+
+### 2. Consultas y Recetas Unificadas por RUT
+
+
+
+* Muestra las consultas y recetas de un propietario ordenadas cronológicamente de la más antigua a la más nueva.
+
+
+* Se incluyó la información del detalle de consulta (diagnóstico, tratamiento y receta) directamente debajo de cada consulta.
+
+
+
+### 3. Asignación Automática de IDs (`AUTOINCREMENT`)
+
+
+
+* Las claves primarias se configuraron como `INTEGER PRIMARY KEY AUTOINCREMENT` en SQLite.
+
+
+* Los modelos ahora aceptan `None` en el ID antes de ser guardados.
+
+
+* El ID se obtiene mediante `cursor.lastrowid` al insertar y se le informa al usuario sin que este tenga que ingresarlo manualmente.
+
+
+
+### 4. Listados Legibles y Ordenados por ID
+
+
+
+* Se restauraron los métodos `__str__` en los modelos usados en los listados y `__repr__` en `Consulta` y `DetalleConsulta` para evitar la salida genérica de memoria tipo `<object at 0x...>`.
+
+
+* Los métodos `listar_todos()` de entidades con ID ordenan por ID (`ORDER BY id...`); los catálogos sin ID usan orden alfabético.
+
+
+
+### 5. Nueva Opción "Registrar Consulta" y Detalle Asociado
+
+
+
+* Se agregó la opción 7 *"Registrar Consulta"* en el menú de registro.
+
+
+* La tabla `detalle_consulta` incorpora la columna `id_consulta` para asociar cada detalle con su consulta correspondiente.
+
+
+
+### 6. Relación 1 a N: Un Dueño con Varias Mascotas
+
+
+
+* Se invirtió la relación previa (1:1): la columna `id_propietario` ahora vive en la tabla `mascotas`.
+
+
+* En `models/propietario.py`, la propiedad `mascota` pasó a ser la lista `mascotas` con el método `asignar_mascota()`.
+
+
+* Al registrar un dueño se permite ingresar múltiples mascotas consecutivas.
+
+
+
+### 7. Integridad de Mascotas (Obligatoriedad de Dueño)
+
+
+
+* Ninguna mascota puede registrarse o existir en el sistema sin un `id_propietario`.
+
+
+* Al registrar una mascota en `screens/registrar_menu.py`, se solicita asociarla a un dueño existente (buscado por RUT) o registrar un dueño nuevo en el momento.
+
+
+
+### 8. Limpieza de Pantalla y Navegación Fluidizada
+
+
+
+* Implementación de `limpiar_pantalla()` (`cls` en Windows / `clear` en Linux/Mac) al cambiar de menú.
+
+
+* Se agregó la función `pausar()` ("Presione Enter para continuar...") para evitar que la información se borre inmediatamente.
+
+
+
+### 9. Captura de Datos con Reintentos (`utilidades.py`)
+
+
+
+* **`pedir_dato()`:** Vuelve a solicitar únicamente el dato erróneo (máximo 3 intentos por campo) sin perder la información ya ingresada en el formulario.
+
+
+* **`validar()`:** Ejecuta los setters de los modelos sobre una instancia borrador (`_Borrador()`) para validar reglas de negocio en tiempo real.
+
+
+* **Excepción `DemasiadosIntentos`:** Si el usuario falla 3 veces en el mismo campo, se cancela el formulario de forma segura y se vuelve al menú principal.
+
+
+
+### 10. Robustez y Manejo de Errores
+
+
+
+* **OverflowError:** Rechazo de enteros demasiado grandes para SQLite (ej. números gigantes en ID o stock).
+
+
+* **Validación de flotantes:** Rechazo de valores `nan` e `inf` en precios.
+
+
+* **Cierre abrupto:** Manejo limpio de `KeyboardInterrupt` (Ctrl+C) y `EOFError` en `main.py`.
+
+
+* **Base bloqueada:** Captura de `sqlite3.OperationalError` (`database is locked`) mostrando una advertencia en lugar de cerrar la aplicación.
+
+
+* **Consistencia de datos:** Verificación de pertenencia entre mascota y propietario antes de actualizar una consulta.
+
+
+
+---
+
+## 3. Resumen de Archivos Modificados por Capa
+
+
+
+| Capa | Archivos | Cambios Principales |
+| --- | --- | --- |
+| **`models/`** | `mascota.py`, `propietario.py`, `persona.py`, `detalle_consulta.py`, `consulta.py`, `veterinario.py`, `medicamento.py`, `receta_medica.py`, `pago.py`<br> | ID opcional (`None`), lista de mascotas en propietario, `id_consulta` en detalle, `normalizar_rut()` en persona y restauración de `__str__`.
+
+ |
+| **`dao/`** | `propietario_dao.py`, `mascota_dao.py`, `detalle_consulta_dao.py`, `consulta_dao.py`, `veterinario_dao.py`, `medicamento_dao.py`, `receta_medica_dao.py`, `especie_dao.py`<br> | Uso de `AUTOINCREMENT`, asignación mediante `cursor.lastrowid` y ordenamiento por ID.
+
+ |
+| **`services/`** | `propietario_service.py`, `veterinario_service.py`, `consulta_service.py`, `detalle_consulta_service.py`, `medicamento_service.py`, `especie_service.py`, `mascota_service.py`<br> | Búsquedas por RUT/nombre, ordenamiento de consultas por fecha y rechazo de mascotas sin dueño.
+
+ |
+| **`screens/`** | `utilidades.py` *(NUEVO)*, `registrar_menu.py`, `menu_consulta.py`, `actualizar_menu.py`, `menu_borrar.py`, `main_menu.py`<br> | Reintentos por campo con `pedir_dato()`, menú de consultas renovado, opción de registrar consulta y limpieza de terminal.
+
+ |
+| **Raíz** | `main.py`, `README.md`<br> | Manejo de interrupciones globales, errores de base de datos y documentación UML actualizada.
+
+ |
+
 ### Cómo ejecutar
 La base de datos se resuelve desde la carpeta del proyecto (`database/clinica_vetcare.db`), así que el programa puede iniciarse desde cualquier directorio:
 ```
@@ -291,7 +466,7 @@ DAO es el puente entre la base de datos y el sistema completo, ningún objeto pa
     def crear_tabla(self):
         ddl = """
             CREATE TABLE IF NOT EXISTS mascotas (
-                id_mascota INTEGER PRIMARY KEY,
+                id_mascota INTEGER PRIMARY KEY AUTOINCREMENT,
                 nombre TEXT NOT NULL,
                 fecha_nacimiento TEXT NOT NULL,
                 id_especie INTEGER NOT NULL,
@@ -337,10 +512,10 @@ filas = cursor.fetchall()
 ```
 Recupera el registro de todas las filas, hace fetchall. Luego, se reconstruye el objeto, es decir, el objeto del usuario que creo en screens no es el mismo con el que se consulta.
 
-Todos los `listar_todos` ordenan por ID (`ORDER BY id_...`), así "Listar registros" muestra los registros en el orden en que se crearon.
+Los `listar_todos` de las entidades con ID ordenan por ID (`ORDER BY id_...`); los catálogos sin ID, como especialidades, se ordenan por nombre.
 
 #### IDs automáticos
-Las tablas usan `INTEGER PRIMARY KEY`, que asigna automáticamente un ID cuando se inserta `NULL`. No se usa `AUTOINCREMENT` ni se mantiene una secuencia separada: si la tabla está vacía, el próximo ID es 1; si tiene registros, será mayor que el ID máximo actual. Si se elimina el registro con el ID máximo, SQLite puede reutilizar ese ID. Las bases existentes se migran al inicializar sus DAO, preservando los IDs y registros actuales.
+Las tablas con IDs generados usan `INTEGER PRIMARY KEY AUTOINCREMENT`. SQLite asigna un ID cuando se inserta `NULL`, y el DAO lo copia al objeto con `lastrowid`. En una base nueva, el primer ID es 1. `AUTOINCREMENT` conserva el contador: no reutiliza IDs borrados, y una base existente con un contador avanzado seguirá asignando números desde ese contador.
 
 Al insertar, el objeto llega con ID `None`. SQLite recibe `NULL` en la clave primaria y asigna el siguiente número; luego el DAO lo copia al objeto con `lastrowid`:
 ```py
@@ -779,26 +954,15 @@ o revertirlos si ocurre un error. La base nueva se guarda en
 |---|---|---|
 | especies | `id_especie` | — |
 | especialidades | `nombre` | — |
-| propietarios | `id_propietario` (`INTEGER PRIMARY KEY`) | — |
-| mascotas | `id_mascota` (`INTEGER PRIMARY KEY`) | `id_especie` → especies, `id_propietario` → propietarios |
-| veterinarios | `id_veterinario` (`INTEGER PRIMARY KEY`) | `especialidad` → especialidades |
-| consulta | `id_consulta` (`INTEGER PRIMARY KEY`) | `id_mascota` → mascotas, `veterinario_id` → veterinarios, `propietario_id` → propietarios |
-| detalle_consulta | `id_detalle` (`INTEGER PRIMARY KEY`) | `id_receta` → receta_medica, `id_consulta` → consulta |
-| receta_medica | `id_receta` (`INTEGER PRIMARY KEY`) | — |
-| medicamentos | `id_medicamento` (`INTEGER PRIMARY KEY`) | — |
+| propietarios | `id_propietario` (`INTEGER PRIMARY KEY AUTOINCREMENT`) | — |
+| mascotas | `id_mascota` (`INTEGER PRIMARY KEY AUTOINCREMENT`) | `id_especie` → especies, `id_propietario` → propietarios |
+| veterinarios | `id_veterinario` (`INTEGER PRIMARY KEY AUTOINCREMENT`) | `especialidad` → especialidades |
+| consulta | `id_consulta` (`INTEGER PRIMARY KEY AUTOINCREMENT`) | `id_mascota` → mascotas, `veterinario_id` → veterinarios, `propietario_id` → propietarios |
+| detalle_consulta | `id_detalle` (`INTEGER PRIMARY KEY AUTOINCREMENT`) | `id_receta` → receta_medica, `id_consulta` → consulta |
+| receta_medica | `id_receta` (`INTEGER PRIMARY KEY AUTOINCREMENT`) | — |
+| medicamentos | `id_medicamento` (`INTEGER PRIMARY KEY AUTOINCREMENT`) | — |
 
 Como las claves foráneas están activas (`PRAGMA foreign_keys = ON` en `conexion.py`), no se puede borrar un registro que otro usa. Por ejemplo, no se puede borrar un propietario que todavía tiene mascotas, ni una consulta que tiene detalles. En esos casos el menú de borrar muestra "existen registros relacionados que impiden la eliminación".
-
-### Bases de datos antiguas
-Si se abre un `.db` creado con una versión anterior, los DAO lo actualizan solos al iniciar (igual que ya hacía `VeterinarioDAO` con `id_persona`):
-
-| DAO | Qué revisa | Qué hace |
-|---|---|---|
-| `PropietarioDAO` | Si `propietarios` todavía tiene la columna `id_mascota` | Copia el dueño a cada mascota (`mascotas.id_propietario`) y rehace la tabla `propietarios` sin `id_mascota` |
-| `MascotaDAO` | Si `mascotas` no tiene `id_propietario` | Agrega la columna |
-| `DetalleConsultaDAO` | Si `detalle_consulta` no tiene `id_consulta` | Agrega la columna |
-
-Las tablas antiguas con `AUTOINCREMENT` se reconstruyen al inicializar sus DAO, conservando registros e IDs y eliminando esa opción del esquema. SQLite sigue asignando IDs sin ella; una tabla vacía vuelve a empezar en 1 y una tabla con datos continúa después de su ID máximo.
 
 ### Errores de base de datos
 Si la base de datos está bloqueada (por ejemplo, abierta en DB Browser for SQLite con cambios sin guardar, o mientras OneDrive la sincroniza), el menú principal muestra el error y vuelve al menú en vez de cerrar el programa:
@@ -861,7 +1025,7 @@ Respuesta:
 - Se agregaron los métodos de búsqueda en los service (ver [Búsquedas en los service](#búsquedas-en-los-service)) y se cambió el menú de consulta.
 - Como el detalle de consulta no estaba unido a ninguna consulta, se agregó la columna `id_consulta` en `detalle_consulta`.
 - No existía una opción para registrar consultas, así que se agregó "7. Registrar Consulta" en el menú de registro.
-- Los IDs se asignan con `INTEGER PRIMARY KEY` y `lastrowid` (ver [IDs automáticos](#ids-automáticos)).
+- Los IDs se asignan con `INTEGER PRIMARY KEY AUTOINCREMENT` y `lastrowid` (ver [IDs automáticos](#ids-automáticos)).
 - La opción de listar mostraba `<... object at 0x...>` porque se habían borrado los `__str__` de los modelos; se restauraron. Además los listados se ordenan por ID.
 
 ### Etapa 2: mascotas, pantalla y reintentos
@@ -1354,7 +1518,6 @@ classDiagram
         + ConstructorPropietarioDAO(conexion_db: ConexionDB) void
         - _db ConexionDB
         + crear_tabla() void
-        - _migrar_relacion_mascotas(conn: Connection) void
         + insertar(propietario: Propietario) void
         - _crear_propietario(fila_propietario: tuple, filas_mascotas: list) Propietario
         + obtener_por_id_estricto(id_propietario: int) Propietario

@@ -10,7 +10,7 @@ class RecetaMedicaDAO:
     def crear_tabla(self):
         ddl = """
             CREATE TABLE IF NOT EXISTS receta_medica (
-                id_receta INTEGER PRIMARY KEY,
+                id_receta INTEGER PRIMARY KEY AUTOINCREMENT,
                 nombre_comercial TEXT NOT NULL,
                 cantidad_mg INTEGER NOT NULL CHECK(cantidad_mg >= 0),
                 instrucciones TEXT NOT NULL
@@ -18,7 +18,6 @@ class RecetaMedicaDAO:
         """
         with self._db.obtener_conexion() as conn:
             conn.execute(ddl)
-            self._db.migrar_tabla_sin_autoincrement(conn, "receta_medica")
 
     def insertar(self, receta: RecetaMedica) -> None:
         sql = """

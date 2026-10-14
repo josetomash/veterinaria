@@ -44,10 +44,8 @@ class TestIdsAutomaticos(unittest.TestCase):
         finally:
             os.chdir(directorio_actual)
 
-    def test_todos_los_daos_crean_esquemas_sin_autoincrement(self):
+    def test_daos_usan_autoincrement_en_tablas_con_id_generado(self):
         daos = (
-            EspecieDAO,
-            EspecialidadDAO,
             PropietarioDAO,
             MascotaDAO,
             VeterinarioDAO,
@@ -66,105 +64,31 @@ class TestIdsAutomaticos(unittest.TestCase):
                 WHERE type = 'table' AND name NOT LIKE 'sqlite_%'
                 """
             ).fetchall()
-        esquemas_con_autoincrement = [
+        esperadas = {
+            "propietarios",
+            "mascotas",
+            "veterinarios",
+            "consulta",
+            "detalle_consulta",
+            "receta_medica",
+            "medicamentos",
+        }
+        esquemas_con_autoincrement = {
             nombre for nombre, ddl in esquemas if "AUTOINCREMENT" in ddl.upper()
-        ]
-        self.assertEqual(esquemas_con_autoincrement, [])
+        }
+        self.assertEqual(esquemas_con_autoincrement, esperadas)
 
-    def test_migra_secuencia_antigua_y_asigna_id_desde_uno(self):
-        with closing(sqlite3.connect(self.ruta_db)) as conn:
-            with conn:
-                conn.execute(
-                    """
-                    CREATE TABLE medicamentos (
-                        id_medicamento INTEGER PRIMARY KEY AUTOINCREMENT,
-                        nombre_comercial TEXT NOT NULL UNIQUE,
-                        nombre_generico TEXT NOT NULL,
-                        tipo TEXT NOT NULL,
-                        precio REAL NOT NULL CHECK(precio > 0),
-                        stock INTEGER NOT NULL CHECK(stock >= 0)
-                    )
-                    """
-                )
-                conn.execute(
-                    """
-                    INSERT INTO medicamentos
-                    VALUES (73, 'Prueba', 'Genérico', 'Prueba', 100, 5)
-                    """
-                )
-                conn.execute("DELETE FROM medicamentos")
-
+    def test_id_empieza_en_uno_en_db_nueva_y_no_se_reutiliza(self):
         dao = MedicamentoDAO(self.conexion_db)
+        primero = Medicamento(None, "Primero", "Genérico", "Prueba", 100, 1)
+        dao.insertar(primero)
+        self.assertEqual(primero.id_medicamento, 1)
 
-        with closing(sqlite3.connect(self.ruta_db)) as conn:
-            ddl = conn.execute(
-                "SELECT sql FROM sqlite_master WHERE name = 'medicamentos'"
-            ).fetchone()[0]
-            secuencia = conn.execute(
-                "SELECT seq FROM sqlite_sequence WHERE name = 'medicamentos'"
-            ).fetchone()
-        self.assertNotIn("AUTOINCREMENT", ddl.upper())
-        self.assertIsNone(secuencia)
+        dao.eliminar(primero.id_medicamento)
 
-        primer_medicamento = Medicamento(None, "Primero", "Genérico", "Prueba", 100, 1)
-        dao.insertar(primer_medicamento)
-        self.assertEqual(primer_medicamento.id_medicamento, 1)
-
-        segundo_medicamento = Medicamento(None, "Segundo", "Genérico", "Prueba", 100, 1)
-        dao.insertar(segundo_medicamento)
-        self.assertEqual(segundo_medicamento.id_medicamento, 2)
-
-    def test_migracion_preserva_ids_referenciados_por_claves_foraneas(self):
-        with closing(sqlite3.connect(self.ruta_db)) as conn:
-            with conn:
-                conn.execute("PRAGMA foreign_keys = ON")
-                conn.execute(
-                    """
-                    CREATE TABLE propietarios (
-                        id_propietario INTEGER PRIMARY KEY AUTOINCREMENT,
-                        nombre TEXT NOT NULL,
-                        rut TEXT NOT NULL UNIQUE,
-                        telefono TEXT NOT NULL,
-                        email TEXT NOT NULL
-                    )
-                    """
-                )
-                conn.execute(
-                    """
-                    CREATE TABLE mascotas (
-                        id_mascota INTEGER PRIMARY KEY,
-                        id_propietario INTEGER NOT NULL,
-                        FOREIGN KEY (id_propietario)
-                            REFERENCES propietarios(id_propietario)
-                    )
-                    """
-                )
-                conn.execute(
-                    """
-                    INSERT INTO propietarios
-                    VALUES (41, 'Ana', '123', '555', 'ana@example.com')
-                    """
-                )
-                conn.execute("INSERT INTO mascotas VALUES (9, 41)")
-
-        PropietarioDAO(self.conexion_db)
-
-        with closing(sqlite3.connect(self.ruta_db)) as conn:
-            propietario = conn.execute(
-                "SELECT id_propietario, nombre FROM propietarios"
-            ).fetchone()
-            mascota = conn.execute(
-                "SELECT id_mascota, id_propietario FROM mascotas"
-            ).fetchone()
-            errores_fk = conn.execute("PRAGMA foreign_key_check").fetchall()
-            ddl = conn.execute(
-                "SELECT sql FROM sqlite_master WHERE name = 'propietarios'"
-            ).fetchone()[0]
-        self.assertEqual(propietario, (41, "Ana"))
-        self.assertEqual(mascota, (9, 41))
-        self.assertEqual(errores_fk, [])
-        self.assertNotIn("AUTOINCREMENT", ddl.upper())
-
+        segundo = Medicamento(None, "Segundo", "Genérico", "Prueba", 100, 1)
+        dao.insertar(segundo)
+        self.assertEqual(segundo.id_medicamento, 2)
 
 if __name__ == "__main__":
     unittest.main()

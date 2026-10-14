@@ -14,7 +14,7 @@ class PropietarioDAO:
     def crear_tabla(self):
         ddl = """
             CREATE TABLE IF NOT EXISTS propietarios (
-                id_propietario INTEGER PRIMARY KEY,
+                id_propietario INTEGER PRIMARY KEY AUTOINCREMENT,
                 nombre TEXT NOT NULL,
                 rut TEXT NOT NULL UNIQUE,
                 telefono TEXT NOT NULL,
@@ -23,57 +23,6 @@ class PropietarioDAO:
         """
         with self._db.obtener_conexion() as conn:
             conn.execute(ddl)
-            columnas = {
-                fila[1] for fila in conn.execute("PRAGMA table_info(propietarios)")
-            }
-            if "id_mascota" in columnas:
-                self._migrar_relacion_mascotas(conn)
-            else:
-                self._db.migrar_tabla_sin_autoincrement(conn, "propietarios")
-
-    def _migrar_relacion_mascotas(self, conn):
-        # Bases antiguas: el propietario guardaba UNA mascota (id_mascota).
-        # Ahora cada mascota guarda a su dueño (mascotas.id_propietario),
-        # así un propietario puede tener varias mascotas.
-        conn.execute("PRAGMA foreign_keys = OFF")
-        columnas_mascotas = {
-            fila[1] for fila in conn.execute("PRAGMA table_info(mascotas)")
-        }
-        if "id_propietario" not in columnas_mascotas:
-            conn.execute(
-                "ALTER TABLE mascotas "
-                "ADD COLUMN id_propietario INTEGER REFERENCES propietarios(id_propietario)"
-            )
-        conn.execute(
-            """
-            UPDATE mascotas
-            SET id_propietario = (
-                SELECT id_propietario FROM propietarios
-                WHERE propietarios.id_mascota = mascotas.id_mascota
-            )
-            WHERE id_propietario IS NULL
-            """
-        )
-        # Se rehace la tabla propietarios sin la columna id_mascota
-        conn.execute(
-            """
-            CREATE TABLE propietarios_nueva (
-                id_propietario INTEGER PRIMARY KEY,
-                nombre TEXT NOT NULL,
-                rut TEXT NOT NULL UNIQUE,
-                telefono TEXT NOT NULL,
-                email TEXT NOT NULL
-            )
-            """
-        )
-        conn.execute(
-            """
-            INSERT INTO propietarios_nueva (id_propietario, nombre, rut, telefono, email)
-            SELECT id_propietario, nombre, rut, telefono, email FROM propietarios
-            """
-        )
-        conn.execute("DROP TABLE propietarios")
-        conn.execute("ALTER TABLE propietarios_nueva RENAME TO propietarios")
 
     def insertar(self, propietario: Propietario) -> None:
         sql = """
