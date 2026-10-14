@@ -685,7 +685,7 @@ El código confirma que los menús se obtienen de manera distinta. En [`main.py`
 | `self._menu_actualizar = ActualizarMenu(...)` | `MenuPrincipal` construye `ActualizarMenu`. |
 | `self._menu_consulta.ejecutar()` y llamadas equivalentes a los otros menús | Los tres menús se invocan desde `MenuPrincipal`. |
 
-La diferencia de construcción explica la decisión representada en el diagrama, pero **no determina por sí sola** si existe composición UML: recibir un objeto por parámetro no impide una composición, y crearlo dentro del constructor no demuestra por sí solo que su ciclo de vida esté ligado al del contenedor. La composición expresa esa intención parte–todo en el modelo. La etiqueta «abre» describe la acción sobre `MenuConsulta`; no convierte la asociación en otro tipo de relación.
+La diferencia de construcción explica la decisión representada en el diagrama
 
 ## 4. Diagrama de registro y borrado
 
