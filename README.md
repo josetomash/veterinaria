@@ -672,7 +672,7 @@ El código confirma que los menús se obtienen de manera distinta. En [`main.py`
 | `self._menu_actualizar = ActualizarMenu(...)` | `MenuPrincipal` construye `ActualizarMenu`. |
 | `self._menu_consulta.ejecutar()` y llamadas equivalentes a los otros menús | Los tres menús se invocan desde `MenuPrincipal`. |
 
-La diferencia de construcción explica la decisión representada en el diagrama, pero **no determina por sí sola** si existe composición UML: recibir un objeto por parámetro no impide una composición, y crearlo dentro del constructor no demuestra por sí solo que su ciclo de vida esté ligado al del contenedor. La composición expresa esa intención parte–todo en el modelo. La etiqueta «abre» describe la acción sobre `MenuConsulta`; no convierte la asociación en otro tipo de relación.
+La diferencia de construcción explica la decisión representada en el diagrama
 
 ## 4. Diagrama de registro y borrado
 
@@ -687,13 +687,13 @@ El [diagrama de registro y borrado](#diagrama-mermaid-menus-registro-y-borrado) 
 | ActualizarMenu–sus siete servicios | Asociaciones (-->), «usa» | El menú de actualización utiliza los servicios indicados. |
 | RegistrarMenu–RecetaMedica | Dependencia (..>), «solicita receta para el detalle» | Al crear un detalle, el menú obtiene una receta y la entrega a DetalleConsulta. |
 
-En el código, `RegistrarMenu` se instancia dentro de `MenuPrincipal.mostrar_menu()`, se ejecuta y no se guarda en un atributo. La notación `*--` es la relación que eligió el diagrama; que la creación sea temporal no prueba por sí sola la semántica de ciclo de vida propia de una composición.
+En el código, `RegistrarMenu` se instancia dentro de `MenuPrincipal.mostrar_menu()`, se ejecuta y no se guarda en un atributo. La notación `*--` es la relación que se selecciono para esto al ser un todo.
 
-La dependencia con `RecetaMedica` es de uso puntual: el menú solicita la receta mediante `RecetaMedicaService` para construir el detalle. Es distinta de la asociación persistente `DetalleConsulta`–`RecetaMedica` del diagrama de dominio.
+La dependencia con `RecetaMedica` es de uso puntual, el menú solicita la receta mediante `RecetaMedicaService` para construir el detalle. Es distinta de la asociación persistente `DetalleConsulta`–`RecetaMedica` del diagrama de dominio.
 
 ## Conclusión
 
-Los diagramas principales utilizan herencia en el dominio; asociaciones entre entidades, menús, servicios, DAO y conexión; composiciones entre `MenuPrincipal` y los menús que el diagrama marca con `*--`; y una dependencia de `RegistrarMenu` hacia `RecetaMedica`. No utilizan agregación (`o--`). Las relaciones expresan el modelo documentado; el código aporta evidencia de implementación, pero no sustituye la intención semántica que define una composición.
+Los diagramas principales utilizan herencia en el dominio, asociaciones entre entidades, menús, servicios, DAO y conexión, composiciones entre `MenuPrincipal` y los menús que el diagrama marca con `*--` y una dependencia de `RegistrarMenu` hacia `RecetaMedica`. No utilizan agregación (`o--`). Las relaciones expresan el modelo documentado, el código aporta evidencia de implementación
 
 # Diagrama Mermaid: Dominio
 ```mermaid
