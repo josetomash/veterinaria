@@ -157,26 +157,16 @@ Los cambios se estructuraron respetando la arquitectura por capas del proyecto (
 
 ## 3. Resumen de Archivos Modificados por Capa
 
+# Resumen de cambios por capa
 
-```
-| Capa | Archivos | Cambios Principales |
+| Capa | Archivos | Cambios principales |
 | --- | --- | --- |
-| **`models/`** | `mascota.py`, `propietario.py`, `persona.py`, `detalle_consulta.py`, `consulta.py`, `veterinario.py`, `medicamento.py`, `receta_medica.py`, `pago.py`<br> | ID opcional (`None`), lista de mascotas en propietario, `id_consulta` en detalle, `normalizar_rut()` en persona y restauración de `__str__`.
+| **`models/`** | `mascota.py`, `propietario.py`, `persona.py`, `detalle_consulta.py`, `consulta.py`, `veterinario.py`, `medicamento.py`, `receta_medica.py`, `pago.py` | ID opcional (`None`), lista de mascotas en propietario, `id_consulta` en detalle, `normalizar_rut()` en persona y restauración de `__str__`. |
+| **`dao/`** | `propietario_dao.py`, `mascota_dao.py`, `detalle_consulta_dao.py`, `consulta_dao.py`, `veterinario_dao.py`, `medicamento_dao.py`, `receta_medica_dao.py`, `especie_dao.py` | Uso de `AUTOINCREMENT`, asignación mediante `cursor.lastrowid` y ordenamiento por ID. |
+| **`services/`** | `propietario_service.py`, `veterinario_service.py`, `consulta_service.py`, `detalle_consulta_service.py`, `medicamento_service.py`, `especie_service.py`, `mascota_service.py` | Búsquedas por RUT/nombre, ordenamiento de consultas por fecha y rechazo de mascotas sin dueño. |
+| **`screens/`** | `utilidades.py` *(NUEVO)*, `registrar_menu.py`, `menu_consulta.py`, `actualizar_menu.py`, `menu_borrar.py`, `main_menu.py` | Reintentos por campo con `pedir_dato()`, menú de consultas renovado, opción de registrar consulta y limpieza de terminal. |
+| **Raíz** | `main.py`, `README.md` | Manejo de interrupciones globales, errores de base de datos y documentación UML actualizada. |
 
- |
-| **`dao/`** | `propietario_dao.py`, `mascota_dao.py`, `detalle_consulta_dao.py`, `consulta_dao.py`, `veterinario_dao.py`, `medicamento_dao.py`, `receta_medica_dao.py`, `especie_dao.py`<br> | Uso de `AUTOINCREMENT`, asignación mediante `cursor.lastrowid` y ordenamiento por ID.
-
- |
-| **`services/`** | `propietario_service.py`, `veterinario_service.py`, `consulta_service.py`, `detalle_consulta_service.py`, `medicamento_service.py`, `especie_service.py`, `mascota_service.py`<br> | Búsquedas por RUT/nombre, ordenamiento de consultas por fecha y rechazo de mascotas sin dueño.
-
- |
-| **`screens/`** | `utilidades.py` *(NUEVO)*, `registrar_menu.py`, `menu_consulta.py`, `actualizar_menu.py`, `menu_borrar.py`, `main_menu.py`<br> | Reintentos por campo con `pedir_dato()`, menú de consultas renovado, opción de registrar consulta y limpieza de terminal.
-
- |
-| **Raíz** | `main.py`, `README.md`<br> | Manejo de interrupciones globales, errores de base de datos y documentación UML actualizada.
-
- |
-```
 ### Cómo ejecutar
 La base de datos se resuelve desde la carpeta del proyecto (`database/clinica_vetcare.db`), así que el programa puede iniciarse desde cualquier directorio:
 ```
