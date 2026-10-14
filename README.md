@@ -700,13 +700,13 @@ El [diagrama de registro y borrado](#diagrama-mermaid-menus-registro-y-borrado) 
 | ActualizarMenu–sus siete servicios | Asociaciones (-->), «usa» | El menú de actualización utiliza los servicios indicados. |
 | RegistrarMenu–RecetaMedica | Dependencia (..>), «solicita receta para el detalle» | Al crear un detalle, el menú obtiene una receta y la entrega a DetalleConsulta. |
 
-En el código, `RegistrarMenu` se instancia dentro de `MenuPrincipal.mostrar_menu()`, se ejecuta y no se guarda en un atributo. La notación `*--` es la relación que eligió el diagrama; que la creación sea temporal no prueba por sí sola la semántica de ciclo de vida propia de una composición.
+En el código, `RegistrarMenu` se instancia dentro de `MenuPrincipal.mostrar_menu()`, se ejecuta y no se guarda en un atributo. La notación `*--` es la relación que se selecciono para esto al ser un todo.
 
-La dependencia con `RecetaMedica` es de uso puntual: el menú solicita la receta mediante `RecetaMedicaService` para construir el detalle. Es distinta de la asociación persistente `DetalleConsulta`–`RecetaMedica` del diagrama de dominio.
+La dependencia con `RecetaMedica` es de uso puntual, el menú solicita la receta mediante `RecetaMedicaService` para construir el detalle. Es distinta de la asociación persistente `DetalleConsulta`–`RecetaMedica` del diagrama de dominio.
 
 ## Conclusión
 
-Los diagramas principales utilizan herencia en el dominio; asociaciones entre entidades, menús, servicios, DAO y conexión; composiciones entre `MenuPrincipal` y los menús que el diagrama marca con `*--`; y una dependencia de `RegistrarMenu` hacia `RecetaMedica`. No utilizan agregación (`o--`). Las relaciones expresan el modelo documentado; el código aporta evidencia de implementación, pero no sustituye la intención semántica que define una composición.
+Los diagramas principales utilizan herencia en el dominio, asociaciones entre entidades, menús, servicios, DAO y conexión, composiciones entre `MenuPrincipal` y los menús que el diagrama marca con `*--` y una dependencia de `RegistrarMenu` hacia `RecetaMedica`. No utilizan agregación (`o--`). Las relaciones expresan el modelo documentado, el código aporta evidencia de implementación
 
 # Diagrama Mermaid: Dominio
 ```mermaid
