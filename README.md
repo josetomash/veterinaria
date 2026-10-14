@@ -3,15 +3,14 @@
 Sistema de consola para gestionar una clínica veterinaria (propietarios, mascotas, veterinarios, consultas, detalles de consulta, recetas médicas y medicamentos) hecho en Python con SQLite.
 
 ### Cómo ejecutar
-El programa se ejecuta desde la carpeta `veterinaria`, porque la base de datos se busca en la ruta relativa `database/clinica_vetcare.db`:
+La base de datos se resuelve desde la carpeta del proyecto (`database/clinica_vetcare.db`), así que el programa puede iniciarse desde cualquier directorio:
 ```
-cd veterinaria
-python main.py
+python C:\ruta\al\proyecto\main.py
 ```
-Si se ejecuta desde otra carpeta, el programa no encuentra la base de datos y lo avisa con este mensaje (en vez de cerrarse con un error de Python):
+Al iniciar, se muestra la ruta exacta del archivo de base de datos que se está usando. Si no se puede abrir:
 ```
 [Error de base de datos] unable to open database file
-Revise que el programa se ejecute desde la carpeta 'veterinaria' y que la base de datos no esté abierta en otro programa.
+Revise la ruta de la base de datos, los permisos de escritura y que el archivo no esté bloqueado por otro programa.
 ```
 
 ### Estructura
@@ -55,8 +54,8 @@ if __name__ == "__main__":
     except sqlite3.Error as error:
         print(f"\n[Error de base de datos] {error}")
         print(
-            "Revise que el programa se ejecute desde la carpeta 'veterinaria' "
-            "y que la base de datos no esté abierta en otro programa."
+            "Revise la ruta de la base de datos, los permisos de escritura "
+            "y que el archivo no esté bloqueado por otro programa."
         )
 ```
 - `KeyboardInterrupt`: el usuario presionó Ctrl+C.
@@ -292,7 +291,7 @@ DAO es el puente entre la base de datos y el sistema completo, ningún objeto pa
     def crear_tabla(self):
         ddl = """
             CREATE TABLE IF NOT EXISTS mascotas (
-                id_mascota INTEGER PRIMARY KEY AUTOINCREMENT,
+                id_mascota INTEGER PRIMARY KEY,
                 nombre TEXT NOT NULL,
                 fecha_nacimiento TEXT NOT NULL,
                 id_especie INTEGER NOT NULL,
@@ -341,7 +340,7 @@ Recupera el registro de todas las filas, hace fetchall. Luego, se reconstruye el
 Todos los `listar_todos` ordenan por ID (`ORDER BY id_...`), así "Listar registros" muestra los registros en el orden en que se crearon.
 
 #### IDs automáticos
-Las tablas usan `INTEGER PRIMARY KEY AUTOINCREMENT`. SQLite no tiene `SEQUENCE` como Oracle o PostgreSQL; su equivalente es `AUTOINCREMENT`, que guarda el último ID usado de cada tabla en la tabla interna `sqlite_sequence`. Gracias a eso un ID nunca se reutiliza, aunque se borre el último registro.
+Las tablas usan `INTEGER PRIMARY KEY`, que asigna automáticamente un ID cuando se inserta `NULL`. No se usa `AUTOINCREMENT` ni se mantiene una secuencia separada: si la tabla está vacía, el próximo ID es 1; si tiene registros, será mayor que el ID máximo actual. Si se elimina el registro con el ID máximo, SQLite puede reutilizar ese ID. Las bases existentes se migran al inicializar sus DAO, preservando los IDs y registros actuales.
 
 Al insertar, el objeto llega con ID `None`. SQLite recibe `NULL` en la clave primaria y asigna el siguiente número; luego el DAO lo copia al objeto con `lastrowid`:
 ```py
@@ -359,7 +358,7 @@ Para que el objeto pueda existir antes de tener ID, los setters de ID de los mod
     @id_mascota.setter
     def id_mascota(self, nuevo_id: int | None):
         if nuevo_id is None:
-            # Aún no se guarda: el ID lo asigna la base de datos (AUTOINCREMENT)
+            # Aún no se guarda: el ID lo asigna la base de datos
             self._id_mascota = None
             return
         if not isinstance(nuevo_id, int) or isinstance(nuevo_id, bool):
@@ -780,13 +779,13 @@ o revertirlos si ocurre un error. La base nueva se guarda en
 |---|---|---|
 | especies | `id_especie` | — |
 | especialidades | `nombre` | — |
-| propietarios | `id_propietario` (AUTOINCREMENT) | — |
-| mascotas | `id_mascota` (AUTOINCREMENT) | `id_especie` → especies, `id_propietario` → propietarios |
-| veterinarios | `id_veterinario` (AUTOINCREMENT) | `especialidad` → especialidades |
-| consulta | `id_consulta` (AUTOINCREMENT) | `id_mascota` → mascotas, `veterinario_id` → veterinarios, `propietario_id` → propietarios |
-| detalle_consulta | `id_detalle` (AUTOINCREMENT) | `id_receta` → receta_medica, `id_consulta` → consulta |
-| receta_medica | `id_receta` (AUTOINCREMENT) | — |
-| medicamentos | `id_medicamento` (AUTOINCREMENT) | — |
+| propietarios | `id_propietario` (`INTEGER PRIMARY KEY`) | — |
+| mascotas | `id_mascota` (`INTEGER PRIMARY KEY`) | `id_especie` → especies, `id_propietario` → propietarios |
+| veterinarios | `id_veterinario` (`INTEGER PRIMARY KEY`) | `especialidad` → especialidades |
+| consulta | `id_consulta` (`INTEGER PRIMARY KEY`) | `id_mascota` → mascotas, `veterinario_id` → veterinarios, `propietario_id` → propietarios |
+| detalle_consulta | `id_detalle` (`INTEGER PRIMARY KEY`) | `id_receta` → receta_medica, `id_consulta` → consulta |
+| receta_medica | `id_receta` (`INTEGER PRIMARY KEY`) | — |
+| medicamentos | `id_medicamento` (`INTEGER PRIMARY KEY`) | — |
 
 Como las claves foráneas están activas (`PRAGMA foreign_keys = ON` en `conexion.py`), no se puede borrar un registro que otro usa. Por ejemplo, no se puede borrar un propietario que todavía tiene mascotas, ni una consulta que tiene detalles. En esos casos el menú de borrar muestra "existen registros relacionados que impiden la eliminación".
 
@@ -799,7 +798,7 @@ Si se abre un `.db` creado con una versión anterior, los DAO lo actualizan solo
 | `MascotaDAO` | Si `mascotas` no tiene `id_propietario` | Agrega la columna |
 | `DetalleConsultaDAO` | Si `detalle_consulta` no tiene `id_consulta` | Agrega la columna |
 
-Las tablas de una base antigua siguen funcionando aunque no tengan `AUTOINCREMENT`: SQLite asigna el ID igual, la única diferencia es que podría reutilizar el ID del último registro borrado. Para tener `AUTOINCREMENT` en una base antigua basta con borrar el `.db`; el programa lo crea de nuevo al iniciar.
+Las tablas antiguas con `AUTOINCREMENT` se reconstruyen al inicializar sus DAO, conservando registros e IDs y eliminando esa opción del esquema. SQLite sigue asignando IDs sin ella; una tabla vacía vuelve a empezar en 1 y una tabla con datos continúa después de su ID máximo.
 
 ### Errores de base de datos
 Si la base de datos está bloqueada (por ejemplo, abierta en DB Browser for SQLite con cambios sin guardar, o mientras OneDrive la sincroniza), el menú principal muestra el error y vuelve al menú en vez de cerrar el programa:
@@ -862,7 +861,7 @@ Respuesta:
 - Se agregaron los métodos de búsqueda en los service (ver [Búsquedas en los service](#búsquedas-en-los-service)) y se cambió el menú de consulta.
 - Como el detalle de consulta no estaba unido a ninguna consulta, se agregó la columna `id_consulta` en `detalle_consulta`.
 - No existía una opción para registrar consultas, así que se agregó "7. Registrar Consulta" en el menú de registro.
-- Los IDs se asignan con `AUTOINCREMENT` (el equivalente de SQLite a un sequence) y `lastrowid` (ver [IDs automáticos](#ids-automáticos)).
+- Los IDs se asignan con `INTEGER PRIMARY KEY` y `lastrowid` (ver [IDs automáticos](#ids-automáticos)).
 - La opción de listar mostraba `<... object at 0x...>` porque se habían borrado los `__str__` de los modelos; se restauraron. Además los listados se ordenan por ID.
 
 ### Etapa 2: mascotas, pantalla y reintentos
@@ -886,7 +885,7 @@ Se pidió revisar todo el código en busca de errores que hicieran fallar el pro
 | Precio `nan` o `inf` | `float()` acepta esos textos: con `nan` aparecía un mensaje falso ("ya existe en el sistema") y con `inf` se guardaba un precio infinito | `convertir_decimal` solo acepta números finitos |
 | Ctrl+C o cerrar la entrada | El programa terminaba mostrando `KeyboardInterrupt` o `EOFError` | `main.py` los captura y sale con "Saliendo del sistema..." |
 | Base de datos bloqueada | Si otro programa tenía la base abierta, el programa se cerraba con `database is locked` | El menú principal muestra el error y vuelve al menú |
-| No se encuentra la base de datos | Al ejecutar desde otra carpeta salía un `Traceback` | Se mantiene la ruta relativa, pero ahora se explica qué hacer (ver [Cómo ejecutar](#cómo-ejecutar)) |
+| Ruta de la base de datos | Al ejecutar desde otra carpeta, SQLite podía usar otra ruta relativa | La ruta predeterminada ahora se resuelve desde el proyecto y se muestra al iniciar (ver [Cómo ejecutar](#cómo-ejecutar)) |
 | Actualizar consulta | Se podía guardar una consulta con la mascota de otro propietario; esa consulta aparecía luego en el RUT equivocado | Se comprueba que la mascota pertenezca al propietario |
 | Actualizar propietario | Se guardaban los datos del propietario antes de preguntar por su mascota; si el usuario se equivocaba 3 veces en la mascota, el propietario quedaba cambiado pero el mensaje decía "No se pudo actualizar" | Primero se piden todos los datos y al final se guarda |
 | Listar → Volver | Elegir "9. Volver" pedía "Presione Enter" antes de volver | Ahora vuelve directo |
@@ -1335,7 +1334,7 @@ classDiagram
     }
 
     class ConexionDB {
-        + ConstructorConexionDB(ruta_db: str = "database/clinica_vetcare.db") void
+        + ConstructorConexionDB(ruta_db: str | None = None) void
         - _ruta_db str
         + obtener_conexion() ContextManager~Connection~
     }
@@ -2164,4 +2163,3 @@ classDiagram
     RegistrarMenu ..> RecetaMedica : solicita receta para el detalle
     MenuPrincipal *-- RegistrarMenu : crea temporalmente
 ```
-

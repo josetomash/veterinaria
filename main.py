@@ -26,6 +26,7 @@ from services.veterinario_service import VeterinarioService
 
 def main():
     conexion_db = ConexionDB()
+    print(f"Base de datos: {conexion_db.ruta_db}")
 
     # se inicializan los servicios con los respectivos DAOs 
     especie_service = EspecieService(EspecieDAO(conexion_db))
@@ -72,6 +73,6 @@ if __name__ == "__main__":
     except sqlite3.Error as error:
         print(f"\n[Error de base de datos] {error}")
         print(
-            "Revise que el programa se ejecute desde la carpeta 'veterinaria' "
-            "y que la base de datos no esté abierta en otro programa."
+            "Revise la ruta de la base de datos, los permisos de escritura "
+            "y que el archivo no esté bloqueado por otro programa."
         )

@@ -15,7 +15,7 @@ class RecetaMedica:
     @id_receta.setter
     def id_receta(self, nuevo_id: int | None):
         if nuevo_id is None:
-            # Aún no se guarda: el ID lo asigna la base de datos (AUTOINCREMENT)
+            # Aún no se guarda: el ID lo asigna la base de datos
             self._id_receta = None
             return
         if not isinstance(nuevo_id, int) or isinstance(nuevo_id, bool):

@@ -13,7 +13,7 @@ class MascotaDAO:
     def crear_tabla(self):
         ddl = """
             CREATE TABLE IF NOT EXISTS mascotas (
-                id_mascota INTEGER PRIMARY KEY AUTOINCREMENT,
+                id_mascota INTEGER PRIMARY KEY,
                 nombre TEXT NOT NULL,
                 fecha_nacimiento TEXT NOT NULL,
                 id_especie INTEGER NOT NULL,
@@ -24,6 +24,7 @@ class MascotaDAO:
         """
         with self._db.obtener_conexion() as conn:
             conn.execute(ddl)
+            self._db.migrar_tabla_sin_autoincrement(conn, "mascotas")
             # Bases antiguas: cada mascota ahora guarda quién es su dueño
             columnas = {
                 fila[1] for fila in conn.execute("PRAGMA table_info(mascotas)")

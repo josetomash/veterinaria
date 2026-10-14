@@ -22,7 +22,7 @@ class MedicamentoDAO:
     def crear_tabla(self):
         ddl = """
             CREATE TABLE IF NOT EXISTS medicamentos (
-                id_medicamento INTEGER PRIMARY KEY AUTOINCREMENT,
+                id_medicamento INTEGER PRIMARY KEY,
                 nombre_comercial TEXT NOT NULL UNIQUE,
                 nombre_generico TEXT NOT NULL,
                 tipo TEXT NOT NULL,
@@ -32,6 +32,7 @@ class MedicamentoDAO:
         """
         with self._db.obtener_conexion() as conn:
             conn.execute(ddl)
+            self._db.migrar_tabla_sin_autoincrement(conn, "medicamentos")
 
     def insertar(self, medicamento: Medicamento) -> None:
         sql = """

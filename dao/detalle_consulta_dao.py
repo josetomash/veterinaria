@@ -11,7 +11,7 @@ class DetalleConsultaDAO:
     def crear_tabla(self):
         ddl = """
             CREATE TABLE IF NOT EXISTS detalle_consulta (
-                id_detalle INTEGER PRIMARY KEY AUTOINCREMENT,
+                id_detalle INTEGER PRIMARY KEY,
                 diagnostico TEXT NOT NULL,
                 tratamiento TEXT NOT NULL,
                 id_receta INTEGER NOT NULL,
@@ -22,6 +22,7 @@ class DetalleConsultaDAO:
         """
         with self._db.obtener_conexion() as conn:
             conn.execute(ddl)
+            self._db.migrar_tabla_sin_autoincrement(conn, "detalle_consulta")
             # Bases antiguas: se agrega la columna que une el detalle con su consulta
             columnas = {
                 fila[1] for fila in conn.execute("PRAGMA table_info(detalle_consulta)")

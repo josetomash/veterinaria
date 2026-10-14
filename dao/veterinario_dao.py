@@ -11,7 +11,7 @@ class VeterinarioDAO:
     def crear_tabla(self):
         ddl = """
             CREATE TABLE IF NOT EXISTS veterinarios (
-                id_veterinario INTEGER PRIMARY KEY AUTOINCREMENT,
+                id_veterinario INTEGER PRIMARY KEY,
                 nombre TEXT NOT NULL,
                 rut TEXT NOT NULL UNIQUE,
                 telefono TEXT NOT NULL,
@@ -21,6 +21,7 @@ class VeterinarioDAO:
         """
         with self._db.obtener_conexion() as conn:
             conn.execute(ddl)
+            self._db.migrar_tabla_sin_autoincrement(conn, "veterinarios")
             columnas = {
                 fila[1] for fila in conn.execute("PRAGMA table_info(veterinarios)")
             }

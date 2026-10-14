@@ -26,7 +26,7 @@ class DetalleConsulta:
     @id_detalle.setter
     def id_detalle(self, nuevo_id: int | None):
         if nuevo_id is None:
-            # Aún no se guarda: el ID lo asigna la base de datos (AUTOINCREMENT)
+            # Aún no se guarda: el ID lo asigna la base de datos
             self._id_detalle = None
             return
         if not isinstance(nuevo_id, int) or isinstance(nuevo_id, bool):

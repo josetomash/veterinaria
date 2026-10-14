@@ -14,7 +14,7 @@ class PropietarioDAO:
     def crear_tabla(self):
         ddl = """
             CREATE TABLE IF NOT EXISTS propietarios (
-                id_propietario INTEGER PRIMARY KEY AUTOINCREMENT,
+                id_propietario INTEGER PRIMARY KEY,
                 nombre TEXT NOT NULL,
                 rut TEXT NOT NULL UNIQUE,
                 telefono TEXT NOT NULL,
@@ -28,6 +28,8 @@ class PropietarioDAO:
             }
             if "id_mascota" in columnas:
                 self._migrar_relacion_mascotas(conn)
+            else:
+                self._db.migrar_tabla_sin_autoincrement(conn, "propietarios")
 
     def _migrar_relacion_mascotas(self, conn):
         # Bases antiguas: el propietario guardaba UNA mascota (id_mascota).
@@ -56,7 +58,7 @@ class PropietarioDAO:
         conn.execute(
             """
             CREATE TABLE propietarios_nueva (
-                id_propietario INTEGER PRIMARY KEY AUTOINCREMENT,
+                id_propietario INTEGER PRIMARY KEY,
                 nombre TEXT NOT NULL,
                 rut TEXT NOT NULL UNIQUE,
                 telefono TEXT NOT NULL,
