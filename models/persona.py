@@ -1,50 +1,38 @@
-from abc import ABC, abstractmethod   #Para transformar la clase en una abstracta
-from exceptions import RutInvalidoException, TelefonoInvalidoException #Para saber que tipo de error es
-class Persona(ABC):
-    def __init__(self, nombre:str, rut:str, telefono:str):
-        #atributos privados
-        self.__nombre = ""
-        self.__rut = ""
-        self.__telefono = ""
-
+class Persona:
+    def __init__(self, nombre: str, rut: str, telefono: str):
         self.nombre = nombre
         self.rut = rut
         self.telefono = telefono
 
-    #---------------------------------------------------------------------------------------
-    # FILTROS (PROPERTY Y SETTER)
-    #---------------------------------------------------------------------------------------
-
-    #FILTRO DE NOMBRE
     @property
-    def nombre(self)-> str:
-        return self.__nombre
+    def nombre(self) -> str:
+        return self._nombre
 
     @nombre.setter
-    def nombre(self, nombre_nuevo: str):
-        if not isinstance(nombre_nuevo, str) or not nombre_nuevo.strip():
-            raise ValueError("El nombre no puede estar vacío.")
-        self.__nombre = " ".join(nombre_nuevo.split()).title()
+    def nombre(self, nuevo_nombre: str):
+        if not isinstance(nuevo_nombre, str):
+            raise TypeError("El nombre debe ser una cadena de texto.")
+        for caracter in nuevo_nombre:
+            if caracter.isdigit():
+                raise ValueError("El nombre no puede contener números.")
+        self._nombre = nuevo_nombre
 
-    #FILTRO DE RUT
     @property
-    def rut(self)-> str:
-        return self.__rut
+    def rut(self) -> str:
+        return self._rut
 
     @rut.setter
-    def rut(self,rut_new:str):
-        rut_new_original =  rut_new.replace(".", "").upper().strip()
-        rut_new = rut_new.replace(".", "").replace("-", "").upper().strip()
-
+    def rut(self, rut_new: str):
+        if not isinstance(rut_new, str):
+            raise TypeError("El RUT debe ser una cadena de texto.")
+        rut_original = rut_new
+        rut_new = rut_new.replace(".", "").replace("-", "").upper()
         if len(rut_new) < 8 or len(rut_new) > 9:
-            raise RutInvalidoException("cantidad de caracteres imposible, verifique bien el rut")
-        
+            raise ValueError("Cantidad de caracteres imposible, verifique bien el rut.")
         cuerpo = rut_new[:-1]
         dv = rut_new[-1]
-
         if not cuerpo.isdigit():
-            raise RutInvalidoException("No se permite letras en el cuerpo del rut, verifique bien el rut")
-        
+            raise ValueError("No se permite letras en el cuerpo del rut, verifique bien el rut.")
         suma = 0
         multiplicador = 2
         for digit in reversed(cuerpo):
@@ -52,48 +40,45 @@ class Persona(ABC):
             multiplicador += 1
             if multiplicador > 7:
                 multiplicador = 2
-
         resto = 11 - (suma % 11)
-
         if resto == 11:
-            dv_calculado = 0
+            dv_calculado = "0"
         elif resto == 10:
             dv_calculado = "K"
         else:
-            dv_calculado = resto
-
+            dv_calculado = str(resto)
         if dv_calculado == dv:
-            self.__rut = rut_new_original
+            self._rut = rut_original
         else:
-            raise RutInvalidoException("Rut invalido, verifique bien el rut")
+            raise ValueError("Rut inválido, verifique bien el rut.")
 
-    #FILTRO DE TELEFONO
     @property
-    def telefono(self)-> str:
-        return self.__telefono
+    def telefono(self) -> str:
+        return self._telefono
 
     @telefono.setter
-    def telefono(self, telefono_new:str):
-        digitos = "".join(caracter for caracter in telefono_new if caracter.isdigit())
-        if len(digitos) == 11 and digitos.startswith("56"):
-            digitos = digitos[2:]
-        if len(digitos) != 9 or not digitos.startswith("9"):
-            raise TelefonoInvalidoException(
-                f"Teléfono '{telefono_new}' inválido. Use un celular chileno, ej: 9 1234 5678."
-            )
-        self.__telefono = "+56 {digitos[0]} {digitos[1:5]} {digitos[5:]}"
+    def telefono(self, telefono_new: str):
+        if not isinstance(telefono_new, str):
+            raise TypeError("El teléfono debe ser una cadena de texto.")
+        telefono_new = telefono_new.strip()
+        identificador = telefono_new[:4]
+        if identificador != "+569":
+            raise ValueError("Número de teléfono no reconocido. Debe comenzar con +569.")
+        elif len(telefono_new) != 12:
+            raise ValueError("Cantidad de dígitos imposible, verifique bien el número telefónico ingresado.")
+        self._telefono = telefono_new
 
-    # ------------------------------------------------------------------
-    # MÉTODOS ABSTRACTOS
-    # ------------------------------------------------------------------
+    def actualizar_telefono(self, nuevo_telefono: str):
+        self.telefono = nuevo_telefono
 
-    @abstractmethod
-    def obtener_rol(self) -> str:
-        pass
+    @staticmethod
+    def normalizar_rut(rut: str) -> str:
+        """Deja el RUT sin puntos ni guion y en mayúscula para poder compararlo."""
+        return rut.replace(".", "").replace("-", "").strip().upper()
 
-    # ------------------------------------------------------------------
-    # MÉTODOS
-    # ------------------------------------------------------------------
-
-    def __str__(self) -> str:
-        return f"[{self.obtener_rol()}] {self.nombre} | RUT {self.rut} | Tel {self.telefono}"
+    def __str__(self):
+        return (
+            f"Nombre: {self.nombre}\n"
+            f"RUT: {self.rut}\n"
+            f"Teléfono: {self.telefono}"
+        )

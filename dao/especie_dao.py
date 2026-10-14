@@ -1,30 +1,60 @@
-import sqlite3
+from database import ConexionDB
 from models.especie import Especie
 
-class EspecieDAO:
-    def __init__(self, ruta_db: str = "database/clinica_veterinaria.db"):
-        self.ruta_db = ruta_db
-        self._create_table()
 
-    def _create_table(self):
-        with sqlite3.connect(self.ruta_db) as conn:
-            cursor = conn.cursor()
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS especies (
-                    id_especie INTEGER PRIMARY KEY AUTOINCREMENT,
-                    nombre TEXT NOT NULL UNIQUE
-                )
-            ''')
-            conn.commit()
+class EspecieDAO:
+    def __init__(self, conexion_db: ConexionDB):
+        self._db = conexion_db
+        self.crear_tabla()
+
+    def crear_tabla(self):
+        ddl = """
+            CREATE TABLE IF NOT EXISTS especies (
+                id_especie INTEGER PRIMARY KEY,
+                nombre TEXT NOT NULL UNIQUE,
+                informacion TEXT NOT NULL
+            )
+        """
+        with self._db.obtener_conexion() as conn:
+            conn.execute(ddl)
 
     def insertar(self, especie: Especie) -> None:
-        query = """
-            INSERT INTO especies (nombre)
-            VALUES (?)
+        sql = """
+            INSERT INTO especies (id_especie, nombre, informacion)
+            VALUES (?, ?, ?)
         """
-        nombre_limpio = especie.value.strip()
+        parametros = (especie.id_especie, especie.nombre_especie, especie.informacion_especie)
+        with self._db.obtener_conexion() as conn:
+            conn.execute(sql, parametros)
 
-        with sqlite3.connect(self.ruta_db) as conn:
+    def obtener_por_id_estricto(self, id_especie: int) -> Especie:
+        sql = "SELECT id_especie FROM especies WHERE id_especie = ?"
+        with self._db.obtener_conexion() as conn:
+            fila = conn.execute(sql, (id_especie,)).fetchone()
+        if fila is None:
+            raise ValueError(f"No existe la especie con ID {id_especie}.")
+        # Tupla: (id_especie,)
+        return next(
+            especie
+            for especie in Especie
+            if especie.id_especie == fila[0]
+        )
+
+    def listar_todos(self) -> list[Especie]:
+        sql = "SELECT id_especie FROM especies ORDER BY id_especie"
+        especies = []
+        with self._db.obtener_conexion() as conn:
             cursor = conn.cursor()
-            cursor.execute(query, (nombre_limpio,))
-            conn.commit()
+            cursor.execute(sql)
+            filas = cursor.fetchall()
+
+            for fila in filas:
+                # Tupla: (id_especie,)
+                especie = next(
+                    especie
+                    for especie in Especie
+                    if especie.id_especie == fila[0]
+                )
+                especies.append(especie)
+        return especies
+
