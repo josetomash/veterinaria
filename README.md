@@ -103,6 +103,18 @@ Cosas a tomar en cuenta:
 -	sql: Es la instrucción misma en SQL, por ejemplo, crear_tabla: En crear tabla primero se usa cursor para ejecutar la instrucción que viene en sql.
 Una vez que se entendieron estos temas pasos a explicarles que hace DAO:
 DAO es el puente entre la base de datos y el sistema completo, ningún objeto pasa a la DB sin antes pasar DAO. DAO solo se llama desde service, no se debe llamar de ningún otro lado. DAO tiene la función de insertar,crear,actualizar,borrar mediante operaciones DDL/DML entre otras que sean parte de SQL. Esto quiere decir que DAO es en realidad un CRUD; create, replace, update, delete. No hay mucho que hablar luego de esto, los datos que inyecta DAO se pasan del mismo service, service toma el objeto creado desde screens, screens usa models, por lo cual activa setters.
+
+### Crear el objeto no es insertarlo ni consultarlo
+Hay métodos con nombres parecidos que pertenecen a capas y momentos distintos:
+
+- En `Screens`, un método como `_crear_medicamento()` solicita los datos al usuario y construye un objeto `Medicamento` en memoria. Todavía no lo guarda en la base de datos.
+- Para registrar ese objeto, la pantalla llama a `MedicamentoService.registrar_medicamento(medicamento)`, que delega la persistencia en `MedicamentoDAO.insertar(medicamento)`.
+- En el DAO, los métodos de consulta reciben filas obtenidas mediante SQL y construyen con ellas objetos de dominio, por ejemplo `Medicamento`. No insertan datos ni muestran el objeto en pantalla.
+- Los DAO construyen las instancias directamente dentro de `obtener_por_id_estricto()`, `listar_todos()` o el método de búsqueda correspondiente. No hay métodos auxiliares `_crear_*` para reconstruir esos objetos.
+
+
+En resumen, el flujo de registro es `Screens → Service → DAO.insertar()`. En una consulta, el flujo de vuelta es `DAO consulta la base y reconstruye el objeto → Service → Screens`.
+
 ```py
     def crear_tabla(self):
         ddl = """
@@ -428,18 +440,16 @@ Para una consulta por ID de medicamento, el resultado pasa por estos pasos:
    ```
 3. En `medicamento_dao.py`, `obtener_por_id_estricto` devuelve el objeto creado desde la fila:
    ```python
-   return self._crear_medicamento(fila)
-   ```
-   Y `_crear_medicamento` hace:
-   ```python
-   return Medicamento(...)
+   return Medicamento(
+       fila[0], fila[1], fila[2], fila[3], fila[4], fila[5]
+   )
    ```
 4. De vuelta en el menú, ese objeto queda en `resultado` y se pasa a:
    ```python
    self._imprimir_resultado(resultado)
    ```
 
-Así que el `return` del DAO devuelve un objeto `Medicamento`; el menú lo recibe y `_imprimir_resultado` lo muestra.
+Así que el `return` del DAO devuelve un objeto `Medicamento`; el menú lo recibe y `_imprimir_resultado` presenta sus atributos. El mismo formateador se usa tanto al consultar por ID como al listar o buscar resultados, de modo que las entidades muestran información legible en vez de la representación predeterminada del objeto.
 
 ## Quién usa el resultado de `obtener_por_id_estricto`
 
@@ -460,7 +470,9 @@ Para consultar un medicamento por ID, el recorrido completo es:
 3. En `MedicamentoDAO.obtener_por_id_estricto`, se busca la fila en SQLite, se crea
    un objeto `Medicamento` y se devuelve al servicio:
    ```python
-   return self._crear_medicamento(fila)
+   return Medicamento(
+       fila[0], fila[1], fila[2], fila[3], fila[4], fila[5]
+   )
    ```
 4. El servicio devuelve el objeto al menú. `_consultar_por_id` lo guarda en
    `resultado` y se lo pasa a `_imprimir_resultado(resultado)`, que lo muestra.
@@ -506,11 +518,10 @@ Esta búsqueda aparece en estos métodos:
 - `EspecieDAO.obtener_por_id_estricto`: busca el valor de `Especie` cuyo ID coincide
   con la única columna consultada, `id_especie`.
 - `EspecieDAO.listar_todos`: hace la misma conversión para cada fila de especies.
-- `MascotaDAO._crear_mascota`: convierte el `id_especie` de la fila de mascota para
-  poder construir el objeto `Mascota`.
-- `MascotaDAO.listar_todos`: hace esa conversión para cada mascota listada.
-- `PropietarioDAO._crear_propietario`: convierte el `id_especie` de la mascota
-  asociada antes de construir la `Mascota` que contiene el propietario.
+- `MascotaDAO.obtener_por_id_estricto` y `MascotaDAO.listar_todos`: convierten el
+  `id_especie` de cada fila para poder construir el objeto `Mascota`.
+- `PropietarioDAO.obtener_por_id_estricto` y `PropietarioDAO.listar_todos`: convierten
+  el `id_especie` de la mascota asociada antes de construir al propietario.
 
 ## Base de datos
 
@@ -632,10 +643,14 @@ El [diagrama de dominio](#diagrama-mermaid-dominio) presenta entidades y sus rel
 | Mascota–Especie | Asociación, «pertenece a» | La mascota se relaciona con una especie. |
 | Veterinario–Especialidad | Asociación, «tiene» | El veterinario se relaciona con una especialidad. |
 | Consulta–Veterinario, Mascota y Propietario | Asociaciones etiquetadas con campos ID | La consulta se relaciona con esas entidades; en el modelo Python conserva sus identificadores. |
+| DetalleConsulta–Consulta | Asociación, «pertenece a» | Cada detalle se vincula a una consulta y, a través de ella, a la mascota atendida y al veterinario tratante. |
 | DetalleConsulta–RecetaMedica | Asociación, «referencia» | El detalle mantiene una receta. |
+| RecetaMedica–Veterinario | Asociación, «prescrita por» | La receta identifica directamente al veterinario que la prescribe. |
 | Pago–MetodosPago | Asociación, «metodo_pago» | El pago se relaciona con el método de pago. |
 
 En este diagrama no se dibujan composiciones ni agregaciones. **«Referencia» es solo la etiqueta descriptiva** de la relación entre `DetalleConsulta` y `RecetaMedica`; en UML, esa relación también se considera una asociación, representada aquí con una flecha sólida (`-->`). «Referencia» no es un tipo adicional de relación UML.
+
+`DetalleConsulta` conserva la consulta asociada; esta contiene los IDs de la mascota atendida y del veterinario tratante. La receta conserva directamente al objeto `Veterinario` que la prescribe. Al registrar o actualizar una receta, la pantalla solicita un ID de veterinario existente. La tabla `receta_medica` persiste esa relación con `id_veterinario`. Para conservar recetas previas a este cambio, la migración deja ese campo vacío; se muestran como pendientes de asignar y no se permite registrar una receta nueva o actualizar una receta sin veterinario.
 
 ## 2. Diagrama de servicios y DAO
 
@@ -791,27 +806,31 @@ classDiagram
     }
 
     class DetalleConsulta {
-        + ConstructorDetalleConsulta(id_detalle: int, diagnostico: str, tratamiento: str, receta: RecetaMedica) void
+        + ConstructorDetalleConsulta(id_detalle: int, diagnostico: str, tratamiento: str, receta: RecetaMedica, consulta: Consulta?) void
         - _id_detalle int
         - _diagnostico str
         - _tratamiento str
         - _receta RecetaMedica
+        - _consulta Consulta
         + id_detalle: int
         + diagnostico: str
         + tratamiento: str
         + receta: RecetaMedica
+        + consulta: Consulta?
     }
 
     class RecetaMedica {
-        + ConstructorRecetaMedica(id_receta: int, nombre_comercial: str, cantidad_mg: int, instrucciones: str) void
+        + ConstructorRecetaMedica(id_receta: int, nombre_comercial: str, cantidad_mg: int, instrucciones: str, veterinario: Veterinario?) void
         - _id_receta int
         - _nombre_comercial str
         - _cantidad_mg int
         - _instrucciones str
+        - _veterinario Veterinario?
         + id_receta: int
         + nombre_comercial: str
         + cantidad_mg: int
         + instrucciones: str
+        + veterinario: Veterinario?
     }
 
     class Medicamento {
@@ -868,8 +887,10 @@ classDiagram
     Consulta "0..*" --> "1" Mascota : mascota_id
     Consulta "0..*" --> "1" Propietario : propietario_id
 
-    %% Detalle / receta
+    %% Cada detalle pertenece a una consulta, que identifica a la mascota atendida.
+    Consulta "1" --> "0..*" DetalleConsulta : contiene
     DetalleConsulta "0..*" --> "1" RecetaMedica : referencia
+    RecetaMedica "0..*" --> "1" Veterinario : prescrita por
 
     %% Pago
     Pago "0..*" --> "1" MetodosPago : metodo_pago
@@ -971,7 +992,6 @@ classDiagram
         - _db ConexionDB
         + crear_tabla() void
         + insertar(mascota: Mascota) void
-        - _crear_mascota(fila: tuple) Mascota
         + obtener_por_id_estricto(id_mascota: int) Mascota
         + listar_todos() list~Mascota~
         + actualizar(mascota: Mascota) bool
@@ -982,7 +1002,6 @@ classDiagram
         - _db ConexionDB
         + crear_tabla() void
         + insertar(propietario: Propietario) void
-        - _crear_propietario(fila_propietario: tuple, fila_mascota: tuple) Propietario
         + obtener_por_id_estricto(id_propietario: int) Propietario
         + listar_todos() list~Propietario~
         + actualizar(propietario: Propietario) bool
@@ -1013,7 +1032,6 @@ classDiagram
         - _db ConexionDB
         + crear_tabla() void
         + insertar(detalle: DetalleConsulta) void
-        - _crear_detalle(fila_detalle: tuple, fila_receta: tuple) DetalleConsulta
         + obtener_por_id_estricto(id_detalle: int) DetalleConsulta
         + listar_todos() list~DetalleConsulta~
         + actualizar(detalle: DetalleConsulta) bool
@@ -1032,7 +1050,6 @@ classDiagram
     class MedicamentoDAO {
         + ConstructorMedicamentoDAO(conexion_db: ConexionDB) void
         - _db ConexionDB
-        - _crear_medicamento(fila: tuple) Medicamento
         + crear_tabla() void
         + insertar(medicamento: Medicamento) void
         + obtener_por_id_estricto(id_medicamento: int) Medicamento
@@ -1193,13 +1210,14 @@ classDiagram
     }
 
     class RegistrarMenu {
-        + ConstructorRegistrarMenu(propietario_service: PropietarioService, mascota_service: MascotaService, veterinario_service: VeterinarioService, medicamento_service: MedicamentoService, receta_medica_service: RecetaMedicaService, detalle_consulta_service: DetalleConsultaService) void
+        + ConstructorRegistrarMenu(propietario_service: PropietarioService, mascota_service: MascotaService, veterinario_service: VeterinarioService, medicamento_service: MedicamentoService, receta_medica_service: RecetaMedicaService, detalle_consulta_service: DetalleConsultaService, consulta_service: ConsultaService) void
         - _propietario_service PropietarioService
         - _mascota_service MascotaService
         - _veterinario_service VeterinarioService
         - _medicamento_service MedicamentoService
         - _receta_medica_service RecetaMedicaService
         - _detalle_consulta_service DetalleConsultaService
+        - _consulta_service ConsultaService
         + mostrar_menu() str
         + ejecutar() void
         - _registrar_propietario() void
@@ -1208,6 +1226,8 @@ classDiagram
         - _registrar_medicamento() void
         - _registrar_receta_medica() void
         - _registrar_detalle_consulta() void
+        - _registrar_consulta() void
+        - _crear_consulta() Consulta
         - _crear_mascota() Mascota
         - _crear_propietario() Propietario
         - _crear_veterinario() Veterinario
@@ -1284,6 +1304,7 @@ classDiagram
     RegistrarMenu --> MedicamentoService : usa
     RegistrarMenu --> RecetaMedicaService : usa
     RegistrarMenu --> DetalleConsultaService : usa
+    RegistrarMenu --> ConsultaService : usa
     RegistrarMenu ..> RecetaMedica : solicita receta para el detalle
 
     ActualizarMenu --> ConsultaService : usa

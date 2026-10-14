@@ -7,18 +7,6 @@ class MedicamentoDAO:
         self._db = conexion_db
         self.crear_tabla()
 
-    @staticmethod
-    def _crear_medicamento(fila) -> Medicamento:
-        # Tupla: (id_medicamento, nombre_comercial, nombre_generico, tipo, precio, stock)
-        return Medicamento(
-            fila[0],
-            fila[1],
-            fila[2],
-            fila[3],
-            fila[4],
-            fila[5],
-        )
-
     def crear_tabla(self):
         ddl = """
             CREATE TABLE IF NOT EXISTS medicamentos (
@@ -61,7 +49,15 @@ class MedicamentoDAO:
             fila = conn.execute(sql, (id_medicamento,)).fetchone()
         if fila is None:
             raise ValueError(f"No existe el medicamento con ID {id_medicamento}.")
-        return self._crear_medicamento(fila)
+        # Tupla: (id_medicamento, nombre_comercial, nombre_generico, tipo, precio, stock)
+        return Medicamento(
+            fila[0],
+            fila[1],
+            fila[2],
+            fila[3],
+            fila[4],
+            fila[5],
+        )
 
     def listar_todos(self) -> list[Medicamento]:
         sql = """
@@ -99,7 +95,14 @@ class MedicamentoDAO:
             filas = conn.execute(sql, (f"%{termino}%",)).fetchall()
         medicamentos = []
         for fila in filas:
-            medicamento = self._crear_medicamento(fila)
+            medicamento = Medicamento(
+                fila[0],
+                fila[1],
+                fila[2],
+                fila[3],
+                fila[4],
+                fila[5],
+            )
             medicamentos.append(medicamento)
         return medicamentos
 

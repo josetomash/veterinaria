@@ -21,8 +21,15 @@ class RecetaMedicaService:
             self._receta_medica_dao.insertar(receta)
             return receta
         except sqlite3.IntegrityError as error:
+            if "FOREIGN KEY constraint failed" in str(error):
+                raise ValueError(
+                    "No se pudo registrar: el veterinario prescriptor no existe."
+                ) from error
             nombre_limpio = receta.nombre_comercial.strip()
-            raise ValueError(f"No se pudo registrar: la receta médica '{nombre_limpio}' ya existe en el sistema.") from error
+            raise ValueError(
+                f"No se pudo registrar: la receta médica '{nombre_limpio}' "
+                "ya existe en el sistema."
+            ) from error
 
     def actualizar_receta_medica(self, receta: RecetaMedica) -> bool:
         return self._receta_medica_dao.actualizar(receta)

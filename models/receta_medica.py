@@ -1,12 +1,23 @@
+from .veterinario import Veterinario
+
+
 CANTIDAD_MINIMA_CARACTERES_INSTRUCCIONES = 10
 
 
 class RecetaMedica:
-    def __init__(self, id_receta: int, nombre_comercial: str, cantidad_mg: int, instrucciones: str):
+    def __init__(
+        self,
+        id_receta: int,
+        nombre_comercial: str,
+        cantidad_mg: int,
+        instrucciones: str,
+        veterinario: Veterinario | None = None,
+    ):
         self.id_receta = id_receta
         self.nombre_comercial = nombre_comercial
         self.cantidad_mg = cantidad_mg
         self.instrucciones = instrucciones
+        self.veterinario = veterinario
 
     @property
     def id_receta(self) -> int:
@@ -62,3 +73,13 @@ class RecetaMedica:
             )
         
         self._instrucciones = texto_limpio
+
+    @property
+    def veterinario(self) -> Veterinario | None:
+        return self._veterinario
+
+    @veterinario.setter
+    def veterinario(self, nuevo_veterinario: Veterinario | None):
+        if nuevo_veterinario is not None and not isinstance(nuevo_veterinario, Veterinario):
+            raise TypeError("El veterinario debe ser una instancia válida de la clase Veterinario.")
+        self._veterinario = nuevo_veterinario

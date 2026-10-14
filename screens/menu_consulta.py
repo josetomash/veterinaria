@@ -1,6 +1,15 @@
 from collections.abc import Iterable
 
-from models import Especie
+from models import (
+    Consulta,
+    DetalleConsulta,
+    Especie,
+    Mascota,
+    Medicamento,
+    Propietario,
+    RecetaMedica,
+    Veterinario,
+)
 from services.consulta_service import ConsultaService
 from services.detalle_consulta_service import DetalleConsultaService
 from services.especie_service import EspecieService
@@ -189,10 +198,87 @@ class MenuConsulta:
     @staticmethod
     def _imprimir_resultado(resultado: object) -> None:
         if isinstance(resultado, Especie):
-            print(
+            detalles = (
                 f"ID Especie: {resultado.id_especie}\n"
                 f"Nombre: {resultado.nombre_especie}\n"
                 f"Información: {resultado.informacion_especie}"
             )
+        elif isinstance(resultado, Consulta):
+            detalles = (
+                f"ID Consulta: {resultado.id_consulta}\n"
+                f"Motivo: {resultado.motivo}\n"
+                f"Fecha: {resultado.fecha_consulta.isoformat()}\n"
+                f"ID Veterinario: {resultado.veterinario_id}\n"
+                f"ID Mascota: {resultado.mascota_id}\n"
+                f"ID Propietario: {resultado.propietario_id}"
+            )
+        elif isinstance(resultado, DetalleConsulta):
+            detalles = [
+                f"ID Detalle: {resultado.id_detalle}\n"
+                f"Diagnóstico: {resultado.diagnostico}\n"
+                f"Tratamiento: {resultado.tratamiento}\n"
+                f"ID Receta: {resultado.receta.id_receta}\n"
+                f"Medicamento: {resultado.receta.nombre_comercial}\n"
+                f"Cantidad: {resultado.receta.cantidad_mg} mg\n"
+                f"Instrucciones: {resultado.receta.instrucciones}\n"
+                f"Veterinario prescriptor: "
+                f"{resultado.receta.veterinario.nombre if resultado.receta.veterinario else 'Pendiente de asignar'}"
+            ]
+            if resultado.consulta is None:
+                detalles.append("Consulta asociada: pendiente (detalle anterior a la vinculación)")
+            else:
+                detalles.append(
+                    f"ID Consulta: {resultado.consulta.id_consulta}\n"
+                    f"ID Mascota: {resultado.consulta.mascota_id}\n"
+                    f"ID Veterinario tratante: {resultado.consulta.veterinario_id}"
+                )
+            detalles = "\n".join(detalles)
+        elif isinstance(resultado, RecetaMedica):
+            detalles = (
+                f"ID Receta: {resultado.id_receta}\n"
+                f"Nombre comercial: {resultado.nombre_comercial}\n"
+                f"Cantidad: {resultado.cantidad_mg} mg\n"
+                f"Instrucciones: {resultado.instrucciones}\n"
+                f"Veterinario prescriptor: "
+                f"{resultado.veterinario.nombre if resultado.veterinario else 'Pendiente de asignar'}"
+            )
+        elif isinstance(resultado, Medicamento):
+            detalles = (
+                f"ID Medicamento: {resultado.id_medicamento}\n"
+                f"Nombre comercial: {resultado.nombre_comercial}\n"
+                f"Nombre genérico: {resultado.nombre_generico}\n"
+                f"Tipo: {resultado.tipo}\n"
+                f"Precio: ${resultado.precio}\n"
+                f"Stock: {resultado.stock}"
+            )
+        elif isinstance(resultado, Mascota):
+            detalles = (
+                f"ID Mascota: {resultado.id_mascota}\n"
+                f"Nombre: {resultado.nombre}\n"
+                f"Fecha de nacimiento: {resultado.fecha_nacimiento.isoformat()}\n"
+                f"Especie: {resultado.tipo_especie}\n"
+                f"Edad: {resultado.calcular_edad()} años"
+            )
+        elif isinstance(resultado, Propietario):
+            detalles = (
+                f"ID Propietario: {resultado.id_propietario}\n"
+                f"Nombre: {resultado.nombre}\n"
+                f"RUT: {resultado.rut}\n"
+                f"Teléfono: {resultado.telefono}\n"
+                f"Email: {resultado.email}\n"
+                f"Mascota: {resultado.mascota.nombre} "
+                f"(ID {resultado.mascota.id_mascota})"
+            )
+        elif isinstance(resultado, Veterinario):
+            detalles = (
+                f"ID Veterinario: {resultado.id_veterinario}\n"
+                f"Nombre: {resultado.nombre}\n"
+                f"RUT: {resultado.rut}\n"
+                f"Teléfono: {resultado.telefono}\n"
+                f"Especialidad: {resultado.especialidad.value}"
+            )
         else:
-            print(resultado)
+            raise TypeError(
+                f"No se puede mostrar un resultado de tipo {type(resultado).__name__}."
+            )
+        print(detalles)

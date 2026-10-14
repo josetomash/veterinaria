@@ -99,11 +99,19 @@ class ActualizarMenu:
 
     def _actualizar_detalle_consulta(self):
         id_detalle = int(input("ID del detalle de consulta a actualizar: "))
+        id_consulta = int(input("ID de la consulta asociada: "))
+        consulta = self._consulta_service.obtener_consulta_por_id(id_consulta)
         diagnostico = input("Diagnóstico: ").strip()
         tratamiento = input("Tratamiento: ").strip()
         id_receta = int(input("ID de la receta médica asociada: "))
         receta = self._receta_medica_service.obtener_receta_medica_por_id(id_receta)
-        detalle = DetalleConsulta(id_detalle, diagnostico, tratamiento, receta)
+        detalle = DetalleConsulta(
+            id_detalle,
+            diagnostico,
+            tratamiento,
+            receta,
+            consulta,
+        )
         self._detalle_consulta_service.actualizar_detalle_consulta(detalle)
 
     def _actualizar_mascota(self):
@@ -188,11 +196,14 @@ class ActualizarMenu:
         )
 
     def _actualizar_receta_medica(self):
+        id_veterinario = int(input("ID del veterinario que prescribe: "))
+        veterinario = self._veterinario_service.obtener_veterinario_por_id(id_veterinario)
         receta = RecetaMedica(
             int(input("ID de la receta médica a actualizar: ")),
             input("Nombre comercial: ").strip(),
             int(input("Cantidad en mg: ")),
             input("Instrucciones: ").strip(),
+            veterinario,
         )
         self._receta_medica_service.actualizar_receta_medica(receta)
 

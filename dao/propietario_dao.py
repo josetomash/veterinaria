@@ -75,7 +75,27 @@ class PropietarioDAO:
             conn.execute(sql_mascota, parametros_mascota)
             conn.execute(sql, parametros)
 
-    def _crear_propietario(self, fila_propietario, fila_mascota) -> Propietario:
+    def obtener_por_id_estricto(self, id_propietario: int) -> Propietario:
+        sql_propietario = """
+            SELECT id_propietario, nombre, rut, telefono, email, id_mascota
+            FROM propietarios
+            WHERE id_propietario = ?
+        """
+        sql_mascota = """
+            SELECT id_mascota, nombre, fecha_nacimiento, id_especie
+            FROM mascotas
+            WHERE id_mascota = ?
+        """
+        with self._db.obtener_conexion() as conn:
+            fila_propietario = conn.execute(sql_propietario, (id_propietario,)).fetchone()
+            if fila_propietario is None:
+                raise ValueError(f"No existe el propietario con ID {id_propietario}.")
+            # Tupla: (id_propietario, nombre, rut, telefono, email, id_mascota)
+            fila_mascota = conn.execute(sql_mascota, (fila_propietario[5],)).fetchone()
+        if fila_mascota is None:
+            raise ValueError(
+                f"No se encontró la mascota asociada al propietario con ID {id_propietario}."
+            )
         # Tuplas:
         # fila_propietario=(id_propietario, nombre, rut, telefono, email, id_mascota);
         # fila_mascota=(id_mascota, nombre, fecha_nacimiento, id_especie)
@@ -98,29 +118,6 @@ class PropietarioDAO:
             fila_propietario[4],
             mascota,
         )
-
-    def obtener_por_id_estricto(self, id_propietario: int) -> Propietario:
-        sql_propietario = """
-            SELECT id_propietario, nombre, rut, telefono, email, id_mascota
-            FROM propietarios
-            WHERE id_propietario = ?
-        """
-        sql_mascota = """
-            SELECT id_mascota, nombre, fecha_nacimiento, id_especie
-            FROM mascotas
-            WHERE id_mascota = ?
-        """
-        with self._db.obtener_conexion() as conn:
-            fila_propietario = conn.execute(sql_propietario, (id_propietario,)).fetchone()
-            if fila_propietario is None:
-                raise ValueError(f"No existe el propietario con ID {id_propietario}.")
-            # Tupla: (id_propietario, nombre, rut, telefono, email, id_mascota)
-            fila_mascota = conn.execute(sql_mascota, (fila_propietario[5],)).fetchone()
-        if fila_mascota is None:
-            raise ValueError(
-                f"No se encontró la mascota asociada al propietario con ID {id_propietario}."
-            )
-        return self._crear_propietario(fila_propietario, fila_mascota)
 
     def listar_todos(self) -> list[Propietario]:
         sql_propietarios = """
@@ -149,7 +146,29 @@ class PropietarioDAO:
                         # Tupla fila_propietario: (id_propietario, nombre, rut, telefono, email, id_mascota)
                         f"con ID {fila_propietario[0]}."
                     )
-                propietarios.append(self._crear_propietario(fila_propietario, fila_mascota))
+                # Tuplas:
+                # fila_propietario=(id_propietario, nombre, rut, telefono, email, id_mascota);
+                # fila_mascota=(id_mascota, nombre, fecha_nacimiento, id_especie)
+                especie = next(
+                    especie
+                    for especie in Especie
+                    if especie.id_especie == fila_mascota[3]
+                )
+                mascota = Mascota(
+                    fila_mascota[0],
+                    fila_mascota[1],
+                    date.fromisoformat(fila_mascota[2]),
+                    especie,
+                )
+                propietario = Propietario(
+                    fila_propietario[1],
+                    fila_propietario[2],
+                    fila_propietario[3],
+                    fila_propietario[0],
+                    fila_propietario[4],
+                    mascota,
+                )
+                propietarios.append(propietario)
         return propietarios
 
     def actualizar(self, propietario: Propietario) -> bool:

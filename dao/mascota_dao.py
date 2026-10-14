@@ -46,7 +46,12 @@ class MascotaDAO:
             )
             conn.execute(sql, parametros_mascota)
 
-    def _crear_mascota(self, fila) -> Mascota:
+    def obtener_por_id_estricto(self, id_mascota: int) -> Mascota:
+        sql = "SELECT id_mascota, nombre, fecha_nacimiento, id_especie FROM mascotas WHERE id_mascota = ?"
+        with self._db.obtener_conexion() as conn:
+            fila = conn.execute(sql, (id_mascota,)).fetchone()
+        if fila is None:
+            raise ValueError(f"No existe la mascota con ID {id_mascota}.")
         # Tupla: (id_mascota, nombre, fecha_nacimiento, id_especie)
         especie = next(
             especie
@@ -59,14 +64,6 @@ class MascotaDAO:
             date.fromisoformat(fila[2]),
             especie,
         )
-
-    def obtener_por_id_estricto(self, id_mascota: int) -> Mascota:
-        sql = "SELECT id_mascota, nombre, fecha_nacimiento, id_especie FROM mascotas WHERE id_mascota = ?"
-        with self._db.obtener_conexion() as conn:
-            fila = conn.execute(sql, (id_mascota,)).fetchone()
-        if fila is None:
-            raise ValueError(f"No existe la mascota con ID {id_mascota}.")
-        return self._crear_mascota(fila)
 
     def listar_todos(self) -> list[Mascota]:
         sql = "SELECT id_mascota, nombre, fecha_nacimiento, id_especie FROM mascotas ORDER BY nombre"

@@ -30,6 +30,7 @@ class MenuPrincipal:
         self._medicamento_service = medicamento_service
         self._receta_medica_service = receta_medica_service
         self._detalle_consulta_service = detalle_consulta_service
+        self._consulta_service = consulta_service
         self._menu_borrar = MenuBorrar(
             consulta_service,
             propietario_service,
@@ -68,6 +69,7 @@ class MenuPrincipal:
                     self._medicamento_service,
                     self._receta_medica_service,
                     self._detalle_consulta_service,
+                    self._consulta_service,
                 )
                 registrar_menu.ejecutar()
             elif usuario == "2":

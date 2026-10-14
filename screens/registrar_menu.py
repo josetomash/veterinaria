@@ -3,6 +3,7 @@ import os
 
 from models.especie import Especie
 from models.especialidad import Especialidad
+from models.consulta import Consulta
 from models.detalle_consulta import DetalleConsulta
 from models.mascota import Mascota
 from models.medicamento import Medicamento
@@ -10,6 +11,7 @@ from models.propietario import Propietario
 from models.receta_medica import RecetaMedica
 from models.veterinario import Veterinario
 from services.detalle_consulta_service import DetalleConsultaService
+from services.consulta_service import ConsultaService
 from services.mascota_service import MascotaService
 from services.medicamento_service import MedicamentoService
 from services.propietario_service import PropietarioService
@@ -26,6 +28,7 @@ class RegistrarMenu:
         medicamento_service: MedicamentoService,
         receta_medica_service: RecetaMedicaService,
         detalle_consulta_service: DetalleConsultaService,
+        consulta_service: ConsultaService,
     ):
         self._propietario_service = propietario_service
         self._mascota_service = mascota_service
@@ -33,6 +36,7 @@ class RegistrarMenu:
         self._medicamento_service = medicamento_service
         self._receta_medica_service = receta_medica_service
         self._detalle_consulta_service = detalle_consulta_service
+        self._consulta_service = consulta_service
 
     def mostrar_menu(self):
         print("=== Menú de Registro ===")
@@ -43,7 +47,8 @@ class RegistrarMenu:
         print("4. Registrar Medicamento")
         print("5. Registrar Receta Médica")
         print("6. Registrar Detalle de Consulta")
-        print("7. Salir")
+        print("7. Registrar Consulta")
+        print("8. Salir")
         print("======================")
         return input("Seleccione una opción: ").strip()
 
@@ -66,6 +71,8 @@ class RegistrarMenu:
             elif opcion == "6":
                 self._registrar_detalle_consulta()
             elif opcion == "7":
+                self._registrar_consulta()
+            elif opcion == "8":
                 print("Saliendo del menú de registro...")
                 break
             else:
@@ -131,6 +138,26 @@ class RegistrarMenu:
             print(f"\n[Error de registro] {error}")
             input("Presione Enter para reintentar...")
 
+    def _registrar_consulta(self):
+        try:
+            consulta = self._crear_consulta()
+            self._consulta_service.registrar_consulta(consulta)
+            print("[OK] Registro de consulta exitoso.")
+            input("Presione Enter para continuar...")
+        except (ValueError, TypeError) as error:
+            print(f"\n[Error de registro] {error}")
+            input("Presione Enter para reintentar...")
+
+    def _crear_consulta(self) -> Consulta:
+        return Consulta(
+            int(input("ID de consulta: ")),
+            input("Motivo: ").strip(),
+            date.fromisoformat(input("Fecha (AAAA-MM-DD): ").strip()),
+            int(input("ID del veterinario: ")),
+            int(input("ID de la mascota: ")),
+            int(input("ID del propietario: ")),
+        )
+
     def _crear_mascota(self) -> Mascota:
         id_mascota = int(input("ID de mascota: "))
         nombre = input("Nombre de mascota: ").strip()
@@ -193,14 +220,19 @@ class RegistrarMenu:
         )
 
     def _crear_receta_medica(self) -> RecetaMedica:
+        id_veterinario = int(input("ID del veterinario que prescribe: "))
+        veterinario = self._veterinario_service.obtener_veterinario_por_id(id_veterinario)
         return RecetaMedica(
             int(input("ID de receta: ")),
             input("Nombre comercial del medicamento: ").strip(),
             int(input("Cantidad en mg: ")),
             input("Instrucciones: ").strip(),
+            veterinario,
         )
 
     def _crear_detalle_consulta(self) -> DetalleConsulta:
+        id_consulta = int(input("ID de la consulta asociada: "))
+        consulta = self._consulta_service.obtener_consulta_por_id(id_consulta)
         id_receta = int(input("ID de la receta médica: "))
         receta = self._receta_medica_service.obtener_receta_medica_por_id(id_receta)
         return DetalleConsulta(
@@ -208,4 +240,5 @@ class RegistrarMenu:
             input("Diagnóstico: ").strip(),
             input("Tratamiento: ").strip(),
             receta,
+            consulta,
         )

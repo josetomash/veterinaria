@@ -1,4 +1,5 @@
 from .receta_medica import RecetaMedica
+from .consulta import Consulta
 
 
 class DetalleConsulta:
@@ -7,7 +8,8 @@ class DetalleConsulta:
         id_detalle: int, 
         diagnostico: str, 
         tratamiento: str, 
-        receta: RecetaMedica
+        receta: RecetaMedica,
+        consulta: Consulta | None = None,
     ):
         """Constructor de la clase DetalleConsulta.
         Delegamos en los setters asignando directamente a self.atributo.
@@ -16,6 +18,7 @@ class DetalleConsulta:
         self.diagnostico = diagnostico
         self.tratamiento = tratamiento
         self.receta = receta
+        self.consulta = consulta
 
     @property
     def id_detalle(self) -> int:
@@ -62,6 +65,16 @@ class DetalleConsulta:
         if not isinstance(nueva_receta, RecetaMedica):
             raise TypeError("La receta debe ser una instancia válida de la clase RecetaMedica.")
         self._receta = nueva_receta
+
+    @property
+    def consulta(self) -> Consulta | None:
+        return self._consulta
+
+    @consulta.setter
+    def consulta(self, nueva_consulta: Consulta | None):
+        if nueva_consulta is not None and not isinstance(nueva_consulta, Consulta):
+            raise TypeError("La consulta debe ser una instancia válida de la clase Consulta.")
+        self._consulta = nueva_consulta
 
 if __name__ == "__main__":
     receta = RecetaMedica(1, 'Amoxicilina', 500, 'Tomar cada 12 horas por 7 días')
