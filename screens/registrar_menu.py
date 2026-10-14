@@ -163,11 +163,10 @@ class RegistrarMenu:
         )
 
     def _crear_veterinario(self) -> Veterinario:
-        id_persona = int(input("ID de persona: "))
+        id_veterinario = int(input("ID de veterinario: "))
         nombre = input("Nombre del veterinario: ").strip()
         rut = input("RUT: ").strip()
         telefono = input("Teléfono (+569...): ").strip()
-        id_veterinario = int(input("ID de veterinario: "))
         especialidades = list(Especialidad)
         print("Especialidades:")
         for indice, especialidad in enumerate(especialidades, start=1):
@@ -176,11 +175,10 @@ class RegistrarMenu:
         if indice_especialidad < 1 or indice_especialidad > len(especialidades):
             raise ValueError("La especialidad seleccionada no existe.")
         return Veterinario(
-            id_persona,
+            id_veterinario,
             nombre,
             rut,
             telefono,
-            id_veterinario,
             especialidades[indice_especialidad - 1],
         )
 

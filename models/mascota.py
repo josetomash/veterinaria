@@ -66,12 +66,3 @@ class Mascota:
         if (hoy.month, hoy.day) < (self.fecha_nacimiento.month, self.fecha_nacimiento.day):
             edad -= 1
         return edad
-
-    def __str__(self) -> str:
-        return (
-            f"ID Mascota: {self.id_mascota}\n"
-            f"Nombre: {self.nombre}\n"
-            f"Fecha de Nacimiento: {self.fecha_nacimiento.strftime('%d/%m/%Y')}\n"
-            f"Especie: {self.tipo_especie}\n"
-            f"Edad: {self.calcular_edad()} años"
-        )

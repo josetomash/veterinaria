@@ -63,29 +63,6 @@ class DetalleConsulta:
             raise TypeError("La receta debe ser una instancia válida de la clase RecetaMedica.")
         self._receta = nueva_receta
 
-    def __str__(self) -> str:
-        """Representación amigable para consola."""
-        return (
-            f"ID Detalle: {self.id_detalle}\n"
-            f"Diagnóstico: {self.diagnostico}\n"
-            f"Tratamiento: {self.tratamiento}\n"
-            f"Receta:\n"
-            f"  - ID: {self.receta.id_receta}\n"
-            f"  - Nombre Comercial: {self.receta.nombre_comercial}\n"
-            f"  - Cantidad: {self.receta.cantidad_mg} mg\n"
-            f"  - Indicaciones: {self.receta.instrucciones}"
-        )
-
-    def __repr__(self) -> str:
-        """Representación técnica para depuración."""
-        return (
-            f"DetalleConsulta(id={self.id_detalle}, "
-            f"diagnostico='{self.diagnostico}', "
-            f"tratamiento='{self.tratamiento}', "
-            f"receta_id={self.receta.id_receta})"
-        )
-
-
 if __name__ == "__main__":
     receta = RecetaMedica(1, 'Amoxicilina', 500, 'Tomar cada 12 horas por 7 días')
     mi_consulta = DetalleConsulta(1, 'Infección leve', 'Administrar antibiótico', receta)

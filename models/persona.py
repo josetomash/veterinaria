@@ -70,10 +70,3 @@ class Persona:
 
     def actualizar_telefono(self, nuevo_telefono: str):
         self.telefono = nuevo_telefono
-
-    def __str__(self):
-        return (
-            f"Nombre: {self.nombre}\n"
-            f"RUT: {self.rut}\n"
-            f"Teléfono: {self.telefono}"
-        )

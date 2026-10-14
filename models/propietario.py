@@ -55,11 +55,3 @@ class Propietario(Persona):
 
     def asignar_mascota(self, nueva_mascota: Mascota):
         self.mascota = nueva_mascota
-
-    def __str__(self):
-        return (
-            f"{super().__str__()}\n"
-            f"ID Propietario: {self.id_propietario}\n"
-            f"Email: {self.email}\n"
-            f"Mascota: {self.mascota.nombre if self.mascota else 'Sin mascota'}"
-        )

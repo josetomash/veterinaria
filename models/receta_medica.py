@@ -62,9 +62,3 @@ class RecetaMedica:
             )
         
         self._instrucciones = texto_limpio
-
-    def __str__(self) -> str:
-        return (
-            f"Receta #{self.id_receta} - {self.nombre_comercial} ({self.cantidad_mg}mg)\n"
-            f"Instrucciones: {self.instrucciones}"
-        )

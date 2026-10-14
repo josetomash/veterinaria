@@ -97,10 +97,3 @@ class Consulta:
         if nuevo_mascota_id <= 0:
             raise ValueError("El ID de la mascota debe ser un número positivo.")
         self._mascota_id = nuevo_mascota_id
-
-    def __repr__(self) -> str:
-        return (
-            f"Consulta(id={self.id_consulta}, motivo='{self.motivo}', "
-            f"fecha={self.fecha_consulta}, vet_id={self.veterinario_id}, "
-            f"mascota_id={self.mascota_id})"
-        )

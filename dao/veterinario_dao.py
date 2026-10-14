@@ -12,7 +12,6 @@ class VeterinarioDAO:
         ddl = """
             CREATE TABLE IF NOT EXISTS veterinarios (
                 id_veterinario INTEGER PRIMARY KEY,
-                id_persona INTEGER NOT NULL,
                 nombre TEXT NOT NULL,
                 rut TEXT NOT NULL UNIQUE,
                 telefono TEXT NOT NULL,
@@ -22,17 +21,21 @@ class VeterinarioDAO:
         """
         with self._db.obtener_conexion() as conn:
             conn.execute(ddl)
+            columnas = {
+                fila[1] for fila in conn.execute("PRAGMA table_info(veterinarios)")
+            }
+            if "id_persona" in columnas:
+                conn.execute("ALTER TABLE veterinarios DROP COLUMN id_persona")
 
     def insertar(self, veterinario: Veterinario) -> None:
         sql = """
             INSERT INTO veterinarios (
-                id_veterinario, id_persona, nombre, rut, telefono, especialidad
+                id_veterinario, nombre, rut, telefono, especialidad
             )
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?)
         """
         parametros = (
             veterinario.id_veterinario,
-            veterinario.id_persona,
             veterinario.nombre,
             veterinario.rut,
             veterinario.telefono,
@@ -44,7 +47,7 @@ class VeterinarioDAO:
 
     def obtener_por_id_estricto(self, id_veterinario: int) -> Veterinario:
         sql = """
-            SELECT id_persona, nombre, rut, telefono, id_veterinario, especialidad
+            SELECT id_veterinario, nombre, rut, telefono, especialidad
             FROM veterinarios
             WHERE id_veterinario = ?
         """
@@ -52,19 +55,18 @@ class VeterinarioDAO:
             fila = conn.execute(sql, (id_veterinario,)).fetchone()
         if fila is None:
             raise ValueError(f"No existe el veterinario con ID {id_veterinario}.")
-        # Tupla: (id_persona, nombre, rut, telefono, id_veterinario, especialidad)
+        # Tupla: (id_veterinario, nombre, rut, telefono, especialidad)
         return Veterinario(
             fila[0],
             fila[1],
             fila[2],
             fila[3],
-            fila[4],
-            Especialidad(fila[5]),
+            Especialidad(fila[4]),
         )
 
     def listar_todos(self) -> list[Veterinario]:
         sql = """
-            SELECT id_persona, nombre, rut, telefono, id_veterinario, especialidad
+            SELECT id_veterinario, nombre, rut, telefono, especialidad
             FROM veterinarios
             ORDER BY nombre
         """
@@ -75,14 +77,13 @@ class VeterinarioDAO:
             filas = cursor.fetchall()
 
             for fila in filas:
-                # Tupla: (id_persona, nombre, rut, telefono, id_veterinario, especialidad)
+                # Tupla: (id_veterinario, nombre, rut, telefono, especialidad)
                 veterinario = Veterinario(
                     fila[0],
                     fila[1],
                     fila[2],
                     fila[3],
-                    fila[4],
-                    Especialidad(fila[5]),
+                    Especialidad(fila[4]),
                 )
                 veterinarios.append(veterinario)
         return veterinarios
@@ -90,11 +91,10 @@ class VeterinarioDAO:
     def actualizar(self, veterinario: Veterinario) -> bool:
         sql = """
             UPDATE veterinarios
-            SET id_persona = ?, nombre = ?, rut = ?, telefono = ?, especialidad = ?
+            SET nombre = ?, rut = ?, telefono = ?, especialidad = ?
             WHERE id_veterinario = ?
         """
         parametros = (
-            veterinario.id_persona,
             veterinario.nombre,
             veterinario.rut,
             veterinario.telefono,

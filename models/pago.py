@@ -39,6 +39,3 @@ class Pago:
         if monto <= 0:
             raise ValueError("El monto a pagar debe ser mayor que cero.")
         self.monto = monto
-
-    def __str__(self):
-        return f"Pago(id_pago={self.id_pago}, fecha_pago={self.fecha_pago}, monto={self.monto}, metodo_pago='{self.metodo_pago}')"

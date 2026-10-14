@@ -22,11 +22,10 @@ En conexión.py se crea la conexión, pero esto se llama desde Main.py
 Todo Screen contiene un método para poder crear el objeto con los datos del usuario
 ```py
     def _crear_veterinario(self) -> Veterinario:
-        id_persona = int(input("ID de persona: "))
+        id_veterinario = int(input("ID de veterinario: "))
         nombre = input("Nombre del veterinario: ").strip()
         rut = input("RUT: ").strip()
         telefono = input("Teléfono (+569...): ").strip()
-        id_veterinario = int(input("ID de veterinario: "))
         especialidades = list(Especialidad)
         print("Especialidades:")
         for indice, especialidad in enumerate(especialidades, start=1):
@@ -35,11 +34,10 @@ Todo Screen contiene un método para poder crear el objeto con los datos del usu
         if indice_especialidad < 1 or indice_especialidad > len(especialidades):
             raise ValueError("La especialidad seleccionada no existe.")
         return Veterinario(
-            id_persona,
+            id_veterinario,
             nombre,
             rut,
             telefono,
-            id_veterinario,
             especialidades[indice_especialidad - 1],
         )
 ```
@@ -48,22 +46,11 @@ Con los datos que el usuario entrega, se usan los modelos, cada clase tiene sus 
 
 Models/Veterinario.py
 ```py
-        self.id_persona = id_persona
         self.id_veterinario = id_veterinario
         self.especialidad = especialidad
-
-    @property
-    def id_persona(self) -> int:
-        return self._id_persona
-
-    @id_persona.setter
-    def id_persona(self, nuevo_id: int):
-        if not isinstance(nuevo_id, int) or isinstance(nuevo_id, bool):
-            raise TypeError("El ID de la persona debe ser un número entero.")
-        if nuevo_id <= 0:
-            raise ValueError("El ID de la persona debe ser un número positivo.")
-        self._id_persona = nuevo_id
 ```
+
+Veterinario usa únicamente `id_veterinario`; Propietario ya se identifica únicamente con `id_propietario`. Al iniciar con una base existente, `VeterinarioDAO` elimina la columna heredada `id_persona` y conserva los demás datos del veterinario.
 
 
 Cabe resaltar que Screens solo captura datos del usuario y crea el objeto mediante el uso de los models. Por lo tanto, la inserción del objeto se delega a Service/DAO.
@@ -723,7 +710,6 @@ classDiagram
         + rut: str
         + telefono: str
         + actualizar_telefono(nuevo_telefono: str) void
-        + __str__() str
     }
 
     class Propietario {
@@ -735,19 +721,15 @@ classDiagram
         + email: str
         + mascota: Mascota
         + asignar_mascota(nueva_mascota: Mascota) void
-        + __str__() str
     }
 
     class Veterinario {
-        + ConstructorVeterinario(id_persona: int, nombre: str, rut: str, telefono: str, id_veterinario: int, especialidad: Especialidad) void
-        - _id_persona int
+        + ConstructorVeterinario(id_veterinario: int, nombre: str, rut: str, telefono: str, especialidad: Especialidad) void
         - _id_veterinario int
         - _especialidad Especialidad
-        + id_persona: int
         + id_veterinario: int
         + especialidad: Especialidad
         + realizar_consulta() void
-        + __str__() str
     }
 
     class Mascota {
@@ -762,7 +744,6 @@ classDiagram
         + especie: Especie
         + tipo_especie() str
         + calcular_edad() int
-        + __str__() str
     }
 
     class Especie {
@@ -807,7 +788,6 @@ classDiagram
         + veterinario_id: int
         + mascota_id: int
         + propietario_id: int
-        + __repr__() str
     }
 
     class DetalleConsulta {
@@ -820,8 +800,6 @@ classDiagram
         + diagnostico: str
         + tratamiento: str
         + receta: RecetaMedica
-        + __str__() str
-        + __repr__() str
     }
 
     class RecetaMedica {
@@ -834,7 +812,6 @@ classDiagram
         + nombre_comercial: str
         + cantidad_mg: int
         + instrucciones: str
-        + __str__() str
     }
 
     class Medicamento {
@@ -851,7 +828,6 @@ classDiagram
         + tipo: str
         + precio: float
         + stock: int
-        + __str__() str
     }
 
     class Pago {
@@ -865,7 +841,6 @@ classDiagram
         + monto: float
         + metodo_pago: MetodosPago
         + pagar(monto: float) void
-        + __str__() str
     }
 
     class MetodosPago {
@@ -1334,7 +1309,6 @@ classDiagram
         + rut() : str
         + telefono() : str
         + actualizar_telefono(nuevo_telefono: str) : void
-        + __str__() : str
     }
 
     class Propietario {
@@ -1346,19 +1320,15 @@ classDiagram
         + email() : str
         + mascota() : Mascota
         + asignar_mascota(nueva_mascota: Mascota) : void
-        + __str__() : str
     }
 
     class Veterinario {
-        + ConstructorVeterinario(id_persona: int, nombre: str, rut: str, telefono: str, id_veterinario: int, especialidad: Especialidad) : void
-        - _id_persona : int
+        + ConstructorVeterinario(id_veterinario: int, nombre: str, rut: str, telefono: str, especialidad: Especialidad) : void
         - _id_veterinario : int
         - _especialidad : Especialidad
-        + id_persona() : int
         + id_veterinario() : int
         + especialidad() : Especialidad
         + realizar_consulta() : void
-        + __str__() : str
     }
 
     class Mascota {
@@ -1373,7 +1343,6 @@ classDiagram
         + especie() : Especie
         + tipo_especie() : str
         + calcular_edad() : int
-        + __str__() : str
     }
 
     class Especie {
@@ -1400,7 +1369,6 @@ classDiagram
         + veterinario_id() : int
         + mascota_id() : int
         + propietario_id() : int
-        + __repr__() : str
     }
 
     class DetalleConsulta {
@@ -1413,8 +1381,6 @@ classDiagram
         + diagnostico() : str
         + tratamiento() : str
         + receta() : RecetaMedica
-        + __str__() : str
-        + __repr__() : str
     }
 
     class RecetaMedica {
@@ -1427,7 +1393,6 @@ classDiagram
         + nombre_comercial() : str
         + cantidad_mg() : int
         + instrucciones() : str
-        + __str__() : str
     }
 
     class Medicamento {
@@ -1444,7 +1409,6 @@ classDiagram
         + tipo() : str
         + precio() : float
         + stock() : int
-        + __str__() : str
     }
 
     class Pago {
@@ -1458,7 +1422,6 @@ classDiagram
         + monto() : float
         + metodo_pago() : MetodosPago
         + pagar(monto: float) : void
-        + __str__() : str
     }
 
     class Especialidad {

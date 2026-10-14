@@ -79,9 +79,3 @@ class Medicamento:
         if nuevo_stock < 0:
             raise ValueError(f"Stock negativo no permitido en VetCare. Intento asignar: {nuevo_stock}")
         self._stock = nuevo_stock
-
-    def __str__(self) -> str:
-        return (
-            f"ID: {self.id_medicamento} | {self.nombre_comercial} ({self.nombre_generico})\n"
-            f"Tipo: {self.tipo} | Precio: ${self.precio} | Stock: {self.stock}"
-        )

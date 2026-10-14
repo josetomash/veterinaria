@@ -198,7 +198,6 @@ class ActualizarMenu:
 
     def _actualizar_veterinario(self):
         id_veterinario = int(input("ID del veterinario a actualizar: "))
-        id_persona = int(input("ID de persona: "))
         nombre = input("Nombre: ").strip()
         rut = input("RUT: ").strip()
         telefono = input("Teléfono (+569...): ").strip()
@@ -211,11 +210,10 @@ class ActualizarMenu:
             raise ValueError("La especialidad seleccionada no existe.")
 
         veterinario = Veterinario(
-            id_persona,
+            id_veterinario,
             nombre,
             rut,
             telefono,
-            id_veterinario,
             especialidades[indice_especialidad - 1],
         )
         self._veterinario_service.actualizar_veterinario(veterinario)
