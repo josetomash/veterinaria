@@ -577,6 +577,8 @@ una fila de mascota existente y satisface la clave foránea. Esta lógica no sol
 reutiliza la mascota sin cambios, cuando el ID ya existe, sobrescribe sus datos
 con los del objeto recibido.
 
+Nota: este comportamiento solo se da en propietario con mascota, en lo demás no se integro porque podría terminar generando reemplazos silenciosos. Lo cual es peligroso.
+
 ## Diagrama UML de clases
 
 Uso de IA para generacion base del diagrama: Use IA para generar el diagrama BASE de clase UML
