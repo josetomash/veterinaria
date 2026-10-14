@@ -50,8 +50,6 @@ Models/Veterinario.py
         self.especialidad = especialidad
 ```
 
-Veterinario usa únicamente `id_veterinario`; Propietario ya se identifica únicamente con `id_propietario`. Al iniciar con una base existente, `VeterinarioDAO` elimina la columna heredada `id_persona` y conserva los demás datos del veterinario.
-
 
 Cabe resaltar que Screens solo captura datos del usuario y crea el objeto mediante el uso de los models. Por lo tanto, la inserción del objeto se delega a Service/DAO.
 ```py
@@ -89,7 +87,7 @@ Eso esta en Screens, si se fijan, se crea el objeto mascota y posteriormente se 
 ```
 Hace un Try en donde usa el método insertar de mascota_dao para insertar a mascota, pero antes revisa si Mascota (es decir, el valor entregado) de verdad es una instancia de mascota (Doble check antes de try). El except espera un fallo tipo sqlite dado que los fallos de validación de datos ya fueron comprobados en el mismo modelos con los setters. 
 
-Esto pasa directamente con TODO lo demás de service, desde registrar hasta borrar un dato, reciclando mismo flujo de control.
+Esto pasa directamente con TODO los demás de service, desde registrar hasta borrar un dato, reciclando mismo flujo de control.
 
 ### DAO
 Esta es la parte más compleja del programa, porque esta toda la lógica SQL. 
@@ -127,14 +125,18 @@ En resumen, el flujo de registro es `Screens → Service → DAO.insertar()`. En
         with self._db.obtener_conexion() as conn:
             conn.execute(ddl)
 ```
-Primero la instrucción DDL (DataModelLenguaje) que tiene una instrucción de crear una tabla. Posteriormente se ejecuta con conn.execute, por que no cursor si esto permite ejecutar instrucciones?
-En sqlite3, conn.execute(sql) es una forma abreviada: ejecuta la instrucción y devuelve un Cursor. Así que no se está evitando el cursor, simplemente no se guarda en una variable porque aquí no hace falta usarlo después.
+Primero la instrucción DDL (DataModelLenguaje) que tiene una instrucción de crear una tabla. Posteriormente se ejecuta con conn.execute
+
+¿por que no ```cursor``` si esto permite ejecutar instrucciones?
+
+En sqlite3, ```conn.execute(sql)``` es una forma abreviada, ejecuta la instrucción y devuelve un ```Cursor```. Así que no se está evitando el cursor, simplemente no se guarda en una variable porque aquí no hace falta usarlo después.
 
  
-Para el CREATE TABLE, no hay filas que recuperar ni más operaciones sobre ese cursor, por eso basta con:
-conn.execute(ddl)
+Para el ```CREATE TABLE```, no hay filas que recuperar ni más operaciones sobre ese cursor, por eso basta con:
 
-Si luego de la ejecución de la instrucción se procede a realizar algo más, ahí se debe usar cursor. 
+```conn.execute(ddl)```
+
+Si luego de la ejecución de la instrucción se procede a realizar algo más, ahí se debe usar ```cursor```. 
 ```py
     def listar_todos(self) -> list[Especie]:
         sql = "SELECT id_especie FROM especies ORDER BY nombre"
@@ -160,7 +162,7 @@ cursor = conn.cursor()
 cursor.execute(sql)
 filas = cursor.fetchall()
 ```
-Recupera el registro de todas las filas, hace fetchall. Luego, se reconstruye el objeto, es decir, el objeto del usuario que creo en screens no es el mismo con el que se consulta.
+Recupera el registro de todas las filas, hace ```fetchall```. Luego, se reconstruye el objeto, es decir, el objeto del usuario que creo en screens no es el mismo con el que se consulta.
 
 
 
@@ -174,7 +176,7 @@ Se dividio en varios setters por cada atributo de clase
 Para automatizar este proceso se utilizo un agente IA.
 
 El agente realizo: Analizo el codigo, separo el setter monolitico en varios setters para cada atributo.
-Agente: Gemini 3.6 Flash
+```Agente: Gemini 3.6 Flash```
 
 # Uso de IA para agilizar desarrollo
 
@@ -213,7 +215,7 @@ class MenuBorrar():
         id = input("Ingrese el ID de la mascota a borrar: ").strip()
 ```
 
-En donde cada service no tiene un metodo para borrar el ID usando DAO que ya tiene el metodo listo para usarse.
+En donde cada service no tiene un metodo para borrar el ID usando DAO.... DAO que ya tiene el metodo listo para usarse.
 
 Se agilizo el desarrollo usando este prompt:
 
@@ -223,7 +225,7 @@ Por ultimo en service crea una nueva funcion abajo de todas las demas que sea "b
 
 Esta luego usara el borrar del DAO con el ID entregado en screen para borrar ese registro.
 
-CHATGPT-6 Luna | Copilot
+```CHATGPT-6 Luna | Copilot```
 
 Codigo Nuevo:
 
@@ -367,17 +369,17 @@ se cambio a:
 ```py
     def _borrar_por_id(self, entidad, accion):
 ```
-Muchas más legible, sacrificando TypeHints innecesarios que dificultaban la lectura del grupo.
+Muchas más legible, sacrificando ```TypeHints``` innecesarios que dificultaban la lectura para el grupo.
 
-Más haya de eso, los DAO ya tenian implementados el metodo borrar por ID, asi que la IA simplemente funciono de conector, agilizando trabajo repetitivo de tener que modificar cada .service con un metodo borrar y este llamar al DAO para borrar ese registro.
+Más haya de eso, los DAO ya tenian implementados el metodo borrar por ID, asi que la IA simplemente funciono de conector, agilizando trabajo repetitivo de tener que modificar cada ```.service``` con un metodo borrar y este llamar al DAO para borrar ese registro.
 
 ### Regla de Negocio
 
-Las clases ENUMERATE no deberian ser borrables del sistema, por lo tanto no integre eso.
+Las clases ```ENUMERATE``` no deberian ser borrables del sistema, por lo tanto no integre eso.
 
 ### Test de Validacion (Test/QA)
 
-Luego de ese pequeño ajuste empece a verificar el codigo nuevo, verificando que no hubieran errores. Esto se encuentra en Image en /Pruebas.
+Luego de ese pequeño ajuste empece a verificar el codigo nuevo, verificando que no hubieran errores. Esto se encuentra en ```Image``` en ```/Pruebas```.
 
 # Reciclando logica para agregar una nueva funcion de actualizar
 
@@ -451,7 +453,7 @@ Para una consulta por ID de medicamento, el resultado pasa por estos pasos:
    self._imprimir_resultado(resultado)
    ```
 
-Así que el `return` del DAO devuelve un objeto `Medicamento`; el menú lo recibe y `_imprimir_resultado` presenta sus atributos. El mismo formateador se usa tanto al consultar por ID como al listar o buscar resultados, de modo que las entidades muestran información legible en vez de la representación predeterminada del objeto.
+Así que el `return` del DAO devuelve un objeto `Medicamento`, el menú lo recibe y `_imprimir_resultado` presenta sus atributos. El mismo formateador se usa tanto al consultar por ID como al listar o buscar resultados, de modo que las entidades muestran información legible en vez de la representación predeterminada del objeto.
 
 ## Quién usa el resultado de `obtener_por_id_estricto`
 
@@ -489,11 +491,15 @@ Al leer, el DAO recibe una fila de SQLite y crea una instancia
 Eso quiere decir que el objeto creado por el usuario no es el mismo que se usa para leerlo.
 
 # fechas
- La base de datos guarda fecha_nacimiento como texto (TEXT), pero el modelo Mascota espera una fecha de Python (datetime.date).
+ La base de datos guarda fecha_nacimiento como texto ```TEXT```
+ pero el modelo Mascota espera una fecha de Python
+ ```py
+     datetime.date
+ ```
 
-Al guardar: mascota.fecha_nacimiento.isoformat() convierte la fecha en texto para SQLite.
+Al guardar:  ```mascota.fecha_nacimiento.isoformat() ``` convierte la fecha en texto para SQLite.
 
-Al leer: date.fromisoformat(fila[2]) convierte ese texto de vuelta en fecha.
+Al leer:  ```date.fromisoformat(fila[2]) ``` convierte ese texto de vuelta en fecha.
 
 ## Búsqueda de objetos a partir de un ID
 
@@ -509,7 +515,7 @@ especie = next(
 )
 ```
 
-`next()` devuelve el elemento que cumple la condición; no devuelve el elemento
+`next()` devuelve el elemento que cumple la condición, no devuelve el elemento
 siguiente a la coincidencia. En este ejemplo, `fila[3]` es `id_especie` según
 la tupla `(id_mascota, nombre, fecha_nacimiento, id_especie)`. El objeto encontrado
 se pasa al constructor de `Mascota`, que requiere una instancia de `Especie`, no
@@ -528,7 +534,7 @@ Esta búsqueda aparece en estos métodos:
 ## Base de datos
 
 Se realizo la conexion de la base de datos mediante main.py el cual incializa la conexion
-conexion.py se encarga de repetir el codigo que estaba en los DAO asi no va creando
+ ```conexion.py ``` se encarga de repetir el codigo que estaba en los DAO asi no va creando
 varias conexiones, crea solo una. Se uso "?" para tratar los datos del usuario
 meramente como texto y asi evitar f-strings para evitar inyecciones SQL
 
@@ -554,21 +560,21 @@ Al registrar un propietario, el menú recoge los datos y construye el objeto
 4. Si todo termina correctamente, `obtener_conexion()` confirma la transacción
    con `commit`; si ocurre un error, la revierte con `rollback`.
 
-Agente: GPT-6 Luna | Copilot
+ ```Agente: GPT-6 Luna | Copilot ```
 
 
 # Manejo de una mascota cuyo ID ya existe
 
 Antes de insertar el propietario, `PropietarioDAO.insertar()` guarda la mascota
 con un `INSERT ... ON CONFLICT(id_mascota) DO UPDATE`. Si no existe una mascota
-con ese ID, la inserta; si ya existe, actualiza su nombre, fecha de nacimiento
+con ese ID, la inserta, si ya existe, actualiza su nombre, fecha de nacimiento
 y especie en lugar de intentar crear una segunda fila con la misma clave
 primaria.
 
 Como el DAO procesa primero la especie y la mascota, y luego inserta el
 propietario con ese mismo `id_mascota`, la referencia del propietario apunta a
 una fila de mascota existente y satisface la clave foránea. Esta lógica no solo
-reutiliza la mascota sin cambios: cuando el ID ya existe, sobrescribe sus datos
+reutiliza la mascota sin cambios, cuando el ID ya existe, sobrescribe sus datos
 con los del objeto recibido.
 
 ## Diagrama UML de clases
@@ -598,7 +604,7 @@ ConstructorMascota() metele ahi todo lo que se debe inicializar en el init.
 
 
 La respuesta la enviare al final del documento dado que es demasiado extenso.
-Agente: GPT-6 Luna | Copilot
+ ```Agente: GPT-6 Luna | Copilot ```
 
 ## DOCUMENTACIÓN TÉCNICA • UML
 ### Diagramas UML · Guía de lectura
@@ -608,7 +614,7 @@ Agente: GPT-6 Luna | Copilot
 
 Lectura de relaciones, multiplicidades y responsabilidades
 
-Esta guía resume las relaciones que **los diagramas principales de este documento dibujan** y distingue esa notación de los hechos concretos que muestra el código. No incluye el boceto inicial del diagrama.
+Esta guía resume las relaciones que **los diagramas principales de este documento dibujan** y distingue esa notación de los hechos concretos que muestra el código.
 
 ### Resumen ejecutivo
 
@@ -650,9 +656,9 @@ El [diagrama de dominio](#diagrama-mermaid-dominio) presenta entidades y sus rel
 | RecetaMedica–Veterinario | Asociación, «prescrita por» | La receta identifica directamente al veterinario que la prescribe. |
 | Pago–MetodosPago | Asociación, «metodo_pago» | El pago se relaciona con el método de pago. |
 
-En este diagrama no se dibujan composiciones ni agregaciones. **«Referencia» es solo la etiqueta descriptiva** de la relación entre `DetalleConsulta` y `RecetaMedica`; en UML, esa relación también se considera una asociación, representada aquí con una flecha sólida (`-->`). «Referencia» no es un tipo adicional de relación UML.
+En este diagrama no se dibujan composiciones ni agregaciones. **«Referencia» es solo la etiqueta descriptiva** de la relación entre `DetalleConsulta` y `RecetaMedica`, en UML, esa relación también se considera una asociación, representada aquí con una flecha sólida (`-->`). «Referencia» no es un tipo adicional de relación UML.
 
-`DetalleConsulta` conserva la consulta asociada; esta contiene los IDs de la mascota atendida y del veterinario tratante. La receta conserva directamente al objeto `Veterinario` que la prescribe. Al registrar o actualizar una receta, la pantalla solicita un ID de veterinario existente. La tabla `receta_medica` persiste esa relación con `id_veterinario`. Para conservar recetas previas a este cambio, la migración deja ese campo vacío; se muestran como pendientes de asignar y no se permite registrar una receta nueva o actualizar una receta sin veterinario.
+`DetalleConsulta` conserva la consulta asociada, esta contiene los IDs de la mascota atendida y del veterinario tratante. La receta conserva directamente al objeto `Veterinario` que la prescribe. Al registrar o actualizar una receta, la pantalla solicita un ID de veterinario existente. La tabla `receta_medica` persiste esa relación con `id_veterinario`. Para conservar recetas previas a este cambio, la migración deja ese campo vacío, se muestran como pendientes de asignar y no se permite registrar una receta nueva o actualizar una receta sin veterinario.
 
 ## 2. Diagrama de servicios y DAO
 
@@ -663,7 +669,7 @@ El [diagrama de servicios](#diagrama-mermaid-servicios) muestra dos patrones de 
 | Servicio → DAO | MascotaService → MascotaDAO | El servicio utiliza y conserva su DAO. |
 | DAO → conexión | MascotaDAO asociado con ConexionDB | El DAO utiliza y conserva la conexión a la base de datos. |
 
-El mismo patrón servicio–DAO y DAO–`ConexionDB` se repite para Propietario, Veterinario, Consulta, DetalleConsulta, RecetaMedica, Medicamento, Especie y Especialidad. En este diagrama no se dibujan herencias, composiciones ni dependencias.
+El mismo patrón servicio–DAO y DAO–`ConexionDB` se repite para Propietario, Veterinario, Consulta, DetalleConsulta, RecetaMedica, Medicamento, Especie y Especialidad. 
 
 ## 3. Diagrama de menús de consulta
 
