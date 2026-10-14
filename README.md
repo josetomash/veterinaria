@@ -639,8 +639,8 @@ El [diagrama de dominio](#diagrama-mermaid-dominio) presenta entidades y sus rel
 
 | Elementos | Relación dibujada | Interpretación |
 |---|---|---|
-| `Persona`–`Propietario` | Herencia (`<|--`) | `Propietario` hereda de `Persona`. |
-| `Persona`–`Veterinario` | Herencia (`<|--`) | `Veterinario` hereda de `Persona`. |
+| `Persona`–`Propietario` | Herencia (<|--) | `Propietario` hereda de `Persona`. |
+| `Persona`–`Veterinario` | Herencia (<|--) | `Veterinario` hereda de `Persona`. |
 | `Propietario`–`Mascota` | Asociación, «tiene» | El propietario se relaciona con una mascota según las multiplicidades indicadas. |
 | `Mascota`–`Especie` | Asociación, «pertenece a» | La mascota se relaciona con una especie. |
 | `Veterinario`–`Especialidad` | Asociación, «tiene» | El veterinario se relaciona con una especialidad. |
