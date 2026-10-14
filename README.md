@@ -158,7 +158,7 @@ Los cambios se estructuraron respetando la arquitectura por capas del proyecto (
 ## 3. Resumen de Archivos Modificados por Capa
 
 
-
+```
 | Capa | Archivos | Cambios Principales |
 | --- | --- | --- |
 | **`models/`** | `mascota.py`, `propietario.py`, `persona.py`, `detalle_consulta.py`, `consulta.py`, `veterinario.py`, `medicamento.py`, `receta_medica.py`, `pago.py`<br> | ID opcional (`None`), lista de mascotas en propietario, `id_consulta` en detalle, `normalizar_rut()` en persona y restauración de `__str__`.
@@ -176,7 +176,7 @@ Los cambios se estructuraron respetando la arquitectura por capas del proyecto (
 | **Raíz** | `main.py`, `README.md`<br> | Manejo de interrupciones globales, errores de base de datos y documentación UML actualizada.
 
  |
-
+```
 ### Cómo ejecutar
 La base de datos se resuelve desde la carpeta del proyecto (`database/clinica_vetcare.db`), así que el programa puede iniciarse desde cualquier directorio:
 ```
