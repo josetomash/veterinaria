@@ -1,5 +1,6 @@
 import sqlite3
 
+from screens.dolar_menu import DolarMenu
 from screens.registrar_menu import RegistrarMenu
 from screens.menu_consulta import MenuConsulta
 from screens.menu_borrar import MenuBorrar
@@ -57,12 +58,16 @@ class MenuPrincipal:
         while True:
             limpiar_pantalla()
             print("\n=== Menú Principal ===")
+            dolar_menu = DolarMenu()
+            exchange_rate = dolar_menu.get_exchange_rate("CLP")
+            print(f"El cambio del precio del dolar es: {exchange_rate}")
             print("Bienvenido al sistema de gestión veterinaria")
             print("1. Registrar consulta")
             print("2. Consultar")
             print("3. Borrar")
             print("4. Actualizar")
-            print("5. Salir")
+            print("5. Consultar tipo de cambio del dólar")
+            print("6. Salir")
             print("======================")
             usuario = input("Seleccione una opción: ").strip()
             try:
@@ -84,6 +89,14 @@ class MenuPrincipal:
                 elif usuario == "4":
                     self._menu_actualizar.ejecutar()
                 elif usuario == "5":
+                    dolar_menu = DolarMenu()
+                    exchange_rate = dolar_menu.get_exchange_rate("CLP")
+                    if exchange_rate is not None:
+                        print(f"El cambio del precio del dolar es: {exchange_rate}")
+                    else:
+                        print("No se pudo obtener el tipo de cambio.")
+                    pausar()
+                elif usuario == "6":
                     print("Saliendo del sistema...")
                     return
                 else:
