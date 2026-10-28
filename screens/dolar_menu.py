@@ -20,5 +20,5 @@ class DolarMenu:
         # tira una excepcion si la solicitud falla, siendo más especifico, una RequestException
         except requests.exceptions.RequestException as e:
             # este except no se activa si tiras un valor ISO que no existe.
-            print(f"Error fetching exchange rate: {e}")
+            print(f"Error en status de la respuesta: {e}")
             return None
