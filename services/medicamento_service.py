@@ -38,11 +38,11 @@ class MedicamentoService:
 
     def poblar_medicamentos_iniciales(self) -> None:
         iniciales = (
-            ("Amoxicilina 250 mg", "Amoxicilina", "Antibiótico", 5500, 100),
-            ("Meloxicam 1 mg", "Meloxicam", "Antiinflamatorio", 4200, 60),
-            ("Carprofeno 25 mg", "Carprofeno", "Antiinflamatorio", 6800, 40),
-            ("Enrofloxacino 50 mg", "Enrofloxacino", "Antibiótico", 7300, 50),
-            ("Metronidazol 250 mg", "Metronidazol", "Antibiótico", 3900, 45),
+            ("Amoxicilina 250 mg", "Amoxicilina", "Antibiótico", 45, 100),
+            ("Meloxicam 1 mg", "Meloxicam", "Antiinflamatorio", 42, 60),
+            ("Carprofeno 25 mg", "Carprofeno", "Antiinflamatorio", 68, 40),
+            ("Enrofloxacino 50 mg", "Enrofloxacino", "Antibiótico", 73, 50),
+            ("Metronidazol 250 mg", "Metronidazol", "Antibiótico", 39, 45),
         )
         existentes = {medicamento.nombre_comercial for medicamento in self.listar_medicamentos()}
         for nombre, generico, tipo, precio, stock in iniciales:

@@ -113,5 +113,5 @@ class MenuPrincipal:
             return
         print(f"Cotización: {dolar}")
         for medicamento in self._medicamento_service.listar_medicamentos():
-            print(f"{medicamento.nombre_comercial}: ${medicamento.precio:,.0f} CLP")
+            print(f"{medicamento.nombre_comercial}: ${medicamento.precio*dolar.conversion_clp:,.0f} CLP")
         pausar()
