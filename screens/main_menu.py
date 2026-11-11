@@ -96,7 +96,7 @@ class MenuPrincipal:
                     print("Opción no válida. Intente nuevamente.")
                     pausar()
             except sqlite3.OperationalError as error:
-                # Por ejemplo: la base de datos está abierta o bloqueada por otro programa
+                # Por ejemplo: la base de datos esta abierta o bloqueada por otro programa
                 print(f"\n[Error de base de datos] {error}")
                 print("Cierre otros programas que estén usando la base de datos e intente nuevamente.")
                 pausar()
@@ -105,6 +105,8 @@ class MenuPrincipal:
         limpiar_pantalla()
         print("\n=== Precios de medicamento ===")
         dolar = self._dolar_service.obtener_cotizacion()
+
+        # si guardado termino dando None
         if dolar is None:
             print("No fue posible obtener una cotización del dólar.")
             pausar()
