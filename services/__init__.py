@@ -7,6 +7,7 @@ from .medicamento_service import MedicamentoService
 from .propietario_service import PropietarioService
 from .receta_medica_service import RecetaMedicaService
 from .veterinario_service import VeterinarioService
+from .dolar_service import DolarService
 
 __all__ = [
     "ConsultaService",
@@ -18,4 +19,5 @@ __all__ = [
     "PropietarioService",
     "RecetaMedicaService",
     "VeterinarioService",
+    "DolarService",
 ]

@@ -11,6 +11,7 @@ from services.propietario_service import PropietarioService
 from services.receta_medica_service import RecetaMedicaService
 from services.veterinario_service import VeterinarioService
 from services.consulta_service import ConsultaService
+from services.dolar_service import DolarService
 from screens.utilidades import limpiar_pantalla, pausar
 
 
@@ -25,6 +26,7 @@ class MenuPrincipal:
         receta_medica_service: RecetaMedicaService,
         detalle_consulta_service: DetalleConsultaService,
         consulta_service: ConsultaService,
+        dolar_service: DolarService,
     ):
         self._propietario_service = propietario_service
         self._mascota_service = mascota_service
@@ -34,6 +36,7 @@ class MenuPrincipal:
         self._receta_medica_service = receta_medica_service
         self._detalle_consulta_service = detalle_consulta_service
         self._consulta_service = consulta_service
+        self._dolar_service = dolar_service
         self._menu_borrar = MenuBorrar(
             consulta_service,
             propietario_service,
@@ -62,7 +65,8 @@ class MenuPrincipal:
             print("2. Consultar")
             print("3. Borrar")
             print("4. Actualizar")
-            print("5. Salir")
+            print("5. Precios de medicamento")
+            print("6. Salir")
             print("======================")
             usuario = input("Seleccione una opción: ").strip()
             try:
@@ -83,6 +87,8 @@ class MenuPrincipal:
                     self._menu_borrar.ejecutar()
                 elif usuario == "4":
                     self._menu_actualizar.ejecutar()
+                elif usuario == "5":
+                    self._mostrar_precios_medicamentos()
                 elif usuario == "6":
                     print("Saliendo del sistema...")
                     return
@@ -94,3 +100,16 @@ class MenuPrincipal:
                 print(f"\n[Error de base de datos] {error}")
                 print("Cierre otros programas que estén usando la base de datos e intente nuevamente.")
                 pausar()
+
+    def _mostrar_precios_medicamentos(self) -> None:
+        limpiar_pantalla()
+        print("\n=== Precios de medicamento ===")
+        dolar = self._dolar_service.obtener_cotizacion()
+        if dolar is None:
+            print("No fue posible obtener una cotización del dólar.")
+            pausar()
+            return
+        print(f"Cotización: {dolar}")
+        for medicamento in self._medicamento_service.listar_medicamentos():
+            print(f"{medicamento.nombre_comercial}: ${medicamento.precio:,.0f} CLP")
+        pausar()

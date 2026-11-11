@@ -7,6 +7,7 @@ from .especialidad_dao import EspecialidadDAO
 from .mascota_dao import MascotaDAO
 from .propietario_dao import PropietarioDAO
 from .veterinario_dao import VeterinarioDAO
+from .dolar_dao import DolarDAO
 
 __all__ = [
     "MedicamentoDAO",
@@ -18,4 +19,5 @@ __all__ = [
     "MascotaDAO",
     "PropietarioDAO",
     "VeterinarioDAO",
+    "DolarDAO",
 ]

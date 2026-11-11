@@ -35,3 +35,16 @@ class MedicamentoService:
 
     def borrar_medicamento(self, id_medicamento: int) -> bool:
         return self._medicamento_dao.eliminar(id_medicamento)
+
+    def poblar_medicamentos_iniciales(self) -> None:
+        iniciales = (
+            ("Amoxicilina 250 mg", "Amoxicilina", "Antibiótico", 5500, 100),
+            ("Meloxicam 1 mg", "Meloxicam", "Antiinflamatorio", 4200, 60),
+            ("Carprofeno 25 mg", "Carprofeno", "Antiinflamatorio", 6800, 40),
+            ("Enrofloxacino 50 mg", "Enrofloxacino", "Antibiótico", 7300, 50),
+            ("Metronidazol 250 mg", "Metronidazol", "Antibiótico", 3900, 45),
+        )
+        existentes = {medicamento.nombre_comercial for medicamento in self.listar_medicamentos()}
+        for nombre, generico, tipo, precio, stock in iniciales:
+            if nombre not in existentes:
+                self.registrar_medicamento(Medicamento(None, nombre, generico, tipo, precio, stock))

@@ -4,6 +4,7 @@ from database import ConexionDB
 from dao import (
     ConsultaDAO,
     DetalleConsultaDAO,
+    DolarDAO,
     EspecialidadDAO,
     EspecieDAO,
     MascotaDAO,
@@ -16,6 +17,7 @@ from screens.menu_consulta import MenuConsulta
 from screens.main_menu import MenuPrincipal
 from services.consulta_service import ConsultaService
 from services.detalle_consulta_service import DetalleConsultaService
+from services.dolar_service import DolarService
 from services.especie_service import EspecieService
 from services.mascota_service import MascotaService
 from services.medicamento_service import MedicamentoService
@@ -38,6 +40,8 @@ def main():
     receta_medica_service = RecetaMedicaService(RecetaMedicaDAO(conexion_db))
     detalle_consulta_service = DetalleConsultaService(DetalleConsultaDAO(conexion_db))
     medicamento_service = MedicamentoService(MedicamentoDAO(conexion_db))
+    medicamento_service.poblar_medicamentos_iniciales()
+    dolar_service = DolarService(DolarDAO(conexion_db))
 
     # construye el menu y
     # se le entrega el servicio que necesita
@@ -60,6 +64,7 @@ def main():
         receta_medica_service,
         detalle_consulta_service,
         consulta_service,
+        dolar_service,
     )
     menu.mostrar_menu()
 
