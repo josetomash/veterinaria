@@ -47,4 +47,8 @@ class MedicamentoService:
         existentes = {medicamento.nombre_comercial for medicamento in self.listar_medicamentos()}
         for nombre, generico, tipo, precio, stock in iniciales:
             if nombre not in existentes:
+                # el primer parametro es None y es la PK, osea el id_medicamento de models. 
+                # se pone None porque de todos modos es autoincremental (revisar dao)
+                # si forzamos una id, podria colisionar con las ids que ya existen en DB
+                # esto se resuelve poiniendo None y dejando que la DB genere el id automaticamente
                 self.registrar_medicamento(Medicamento(None, nombre, generico, tipo, precio, stock))

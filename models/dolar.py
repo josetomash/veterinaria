@@ -49,9 +49,20 @@ class Dolar:
 
 	@classmethod
 	def limpiar_respuesta(cls, fuente: str, respuesta: dict) -> "Dolar":
+		"""	
+			aqui se parsea la respuesta al formato que se espera:
+
+			return cls(
+				timestamp, 
+				valor_dolar, 
+				conversion_clp
+			)
+
+		"""
+
 		if not isinstance(respuesta, dict):
 			raise TypeError("La respuesta de la API debe ser un objeto JSON.")
-
+		
 		if fuente == "exchangerate-api":
 			fecha = respuesta.get("date")
 			base = respuesta.get("base", "USD")
@@ -76,14 +87,26 @@ class Dolar:
 			conversion = dolares.get("clp") if isinstance(dolares, dict) else None
 		else:
 			raise ValueError(f"Fuente de cotización no soportada: {fuente}.")
-
+		# si por algun motivo la api no entrega lo que queremos
+		# levanta raise y lo captura service luego
 		if base != "USD" or fecha is None or conversion is None:
 			raise ValueError("La API no entregó timestamp, USD base y conversión a CLP.")
 
 		if isinstance(fecha, (int, float)):
+			"""
+			Este bloque comprueba si el dato fecha llego como un numero (entero o decimal) 
+			en lugar de texto y lo convierte en una fecha legible (año, mes y día) 
+			usando la zona horaria universal (UTC).
+			
+			fromtimestamp : 
+			Es un metodo de Python que traduce segundos transcurridos a una fecha del calendario.
+			"""
 			timestamp = datetime.fromtimestamp(fecha, timezone.utc).date()
 		elif isinstance(fecha, str):
 			try:
+				# una fecha normal tiene año mes dia 
+				# total: 10 digitos
+				# el slice corta lo que viene despues de eso (UTC)
 				timestamp = date.fromisoformat(fecha[:10])
 			except ValueError:
 				# Z indica que la hora esta expresada en UTC (tiempo universal coordinado). Una ref mundial.
@@ -91,12 +114,17 @@ class Dolar:
 				# En python 3.9 si no se pone +00:00
 				# ValueError: Invalid isoformat string: '2023-06-01T00:00:00Z'
 				fecha_con_zona_horaria = fecha.replace("Z", "+00:00")
+				# Si fecha = "2026-11-12T15:30:00Z", entonces: 
+				# fecha.replace("Z", "+00:00") devuelve "2026-11-12T15:30:00+00:00"
 				fecha_hora = datetime.fromisoformat(fecha_con_zona_horaria)
-				timestamp = fecha_hora.date()
+				timestamp = fecha_hora.date() # extraer solo el dia 
+
+			# el try y el except ambos intentan conseguir una fecha tipo objeto Date en python.
 		else:
 			raise TypeError("El timestamp de la API tiene un formato no reconocido.")
-
 		valor_dolar = 1.0
+		# valor fijo, siempre uno, si se cambia por ej a 2:
+		# estariamos sacando el valor del dolar x2, lo cual no es correcto.
 		conversion_clp = float(conversion)
 		return cls(timestamp, valor_dolar, conversion_clp)
 

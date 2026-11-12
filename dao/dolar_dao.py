@@ -9,6 +9,10 @@ class DolarDAO:
 		self._db = conexion_db
 		self.crear_tabla()
 	# llamado desde el constructor
+
+	# IMPORTANTE: REAL es un tipo de dato numerico de punto flotante de precision simple 
+	# guarda numeros decimales de forma aproximada
+	# Precision: Ofrece una precision de aproximadamente 7 digitos decimales. 
 	def crear_tabla(self) -> None:
 		ddl = """
 			CREATE TABLE IF NOT EXISTS dolar (
