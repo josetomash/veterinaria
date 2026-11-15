@@ -1,3 +1,46 @@
+# Dolar
+
+Todas las APIS  de dolar no cuenta con API Key
+esto porque los registros de las paginas donde se consultan las apis
+no piden una key.
+
+Uso de IA modelo gpt-6 luna con github copilot
+Se utilizo el siguiente prompt para realizar el boceto de como construir la API:
+
+En base al flujo actual de trabajo desde main -> screens -> models -> screens -> service -> dao
+Y en base a lo que tengo actualmente
+Realiza usando solo las APIs que tengo actualmente
+el flujo completo solo considerando actualmente como se estructura el proyecto
+
+Restricciones e indicaciones:
+
+1- Prohibido refactorizar codigo viejo 
+2- Prohibido usar pathlib o cualquier libreria para resolvimiento de rutas
+3- Usa solo las librerias de requierments.txt 
+4- La primera API (url entregada aqui) es prioridad, tiene 5 intentos en vez de 1 para volver a consultar en un for
+5- Timeout de respuesta de 5 segundos para cada consulta de API
+6- Hace breaks si la consulta devuele un errore entre 2xx y 404
+7- Solo deja pasar si estan dentro del codigo que acepte un "OK" 
+8- En mi models implementa los setters y getters para detectar fallos numericos ajenos a fallos de conexion de la libreria requests
+9- En service y dao primero que consulte si ya existe un registro del resultado de la API
+10- Ese registro no vence hasta  dentro de 1d
+11- Usa timestamp y fromisoformat/isoformat porque entre SQLite/Python hay una traduccion de .date a texto
+12- 5 intentos la primera api del list (prinicipal) y 1 intento las demas, con 5s timeout
+13- dos bucles for anidados uno que recorra el list y tome una API del list, otro for que haga todas las comprobaciones
+14- Si da exito hace un return del objeto recien creado por la API
+15- Si falla algo hace un return del dato guardado en DAO 
+16- Sea cual sea el resultado hace una comprobacion en screens para no mostrar el dolar si fue None
+17- Las comprobaciones deben ser ifs y trys except para evitar errores
+18- models hace un raise y la captura del error termina en service
+19- Realiza por ultimo el codigo para el test de dolar para comprobar integridad y seguridad
+
+Observaciones:
+
+1- entrego el codigo bien hecho con todas las indicaciones y restricciones
+2- agrego sobreingenieria haciendo la sintaxis compleja de leer
+3- se refactorizo todo por completo para que sea legible lo entregado
+4- estudie el codigo por completo para entender la logica que realizo
+
 # Veterinaria VetCare DOC Principal
 
 Sistema de consola para gestionar una clínica veterinaria (propietarios, mascotas, veterinarios, consultas, detalles de consulta, recetas médicas y medicamentos) hecho en Python con SQLite.
