@@ -16,7 +16,7 @@ Restricciones e indicaciones:
 
 1- Prohibido refactorizar codigo viejo 
 2- Prohibido usar pathlib o cualquier libreria para resolvimiento de rutas
-3- Usa solo las librerias de requierments.txt 
+3- Usa solo las librerias de requerimientos.txt 
 4- La primera API (url entregada aqui) es prioridad, tiene 5 intentos en vez de 1 para volver a consultar en un for
 5- Timeout de respuesta de 5 segundos para cada consulta de API
 6- Hace breaks si la consulta devuele un errores entre 2xx y 404
