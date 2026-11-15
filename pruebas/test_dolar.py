@@ -1,8 +1,9 @@
 import os
+import sys
 import tempfile
-import unittest
 from datetime import date
-from unittest.mock import patch
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import requests
 
@@ -21,61 +22,97 @@ class RespuestaAPI:
         return self._datos
 
 
-class TestDolar(unittest.TestCase):
-    def setUp(self):
-        self.directorio_temporal = tempfile.TemporaryDirectory()
-        ruta_db = os.path.join(self.directorio_temporal.name, "prueba.db")
-        self.dao = DolarDAO(ConexionDB(ruta_db))
-        self.servicio = DolarService(self.dao)
+def verificar(condicion, mensaje):
+    if not condicion:
+        raise RuntimeError(f"Prueba fallida: {mensaje}")
 
-    def tearDown(self):
-        self.directorio_temporal.cleanup()
 
-    def test_normaliza_respuesta_principal_a_objeto_dominio(self):
-        dolar = Dolar.limpiar_respuesta(
-            "exchangerate-api",
-            {"base": "USD", "date": "2026-11-11", "rates": {"CLP": 950.5}},
+def test_normaliza_respuesta_principal():
+    dolar = Dolar.limpiar_respuesta(
+        "exchangerate-api",
+        {"base": "USD", "date": "2026-11-11", "rates": {"CLP": 950.5}},
+    )
+
+    verificar(dolar.timestamp == date(2026, 11, 11), f"Fecha esperada 2026-11-11, obtuvo {dolar.timestamp}")
+    verificar(dolar.valor_dolar == 1.0, f"Valor dolar esperado 1.0, obtuvo {dolar.valor_dolar}")
+    verificar(dolar.conversion_clp == 950.5, f"CLP esperado 950.5, obtuvo {dolar.conversion_clp}")
+
+
+def test_reintenta_con_timeout_creciente_y_guarda_fallback():
+    timeouts_usados = []
+    intentos = 0
+
+    def get_falso(url, params=None, timeout=None):
+        nonlocal intentos
+        timeouts_usados.append(timeout)
+        intentos += 1
+
+        if intentos <= 6:
+            raise requests.exceptions.Timeout()
+
+        return RespuestaAPI(
+            200,
+            {
+                "base_code": "USD",
+                "time_last_update_unix": 1794355200,
+                "rates": {"CLP": 951.25},
+            },
         )
 
-        self.assertEqual(dolar.timestamp, date(2026, 11, 11))
-        self.assertEqual(dolar.valor_dolar, 1.0)
-        self.assertEqual(dolar.conversion_clp, 950.5)
+    get_original = requests.get
+    try:
+        requests.get = get_falso
+        with tempfile.TemporaryDirectory() as carpeta_temp:
+            ruta_db = os.path.join(carpeta_temp, "prueba.db")
+            dao = DolarDAO(ConexionDB(ruta_db))
+            servicio = DolarService(dao)
 
-    @patch("services.dolar_service.requests.get")
-    def test_reintenta_con_timeout_creciente_y_guarda_el_fallback(self, get):
-        get.side_effect = [
-            requests.exceptions.Timeout()
-            for _ in range(6)
-        ] + [
-            RespuestaAPI(
-                200,
-                {
-                    "base_code": "USD",
-                    "time_last_update_unix": 1794355200,
-                    "rates": {"CLP": 951.25},
-                },
+            dolar = servicio.obtener_cotizacion()
+
+            verificar(isinstance(dolar, Dolar), "No devolvió una instancia de Dolar")
+            verificar(dolar.conversion_clp == 951.25, f"CLP esperado 951.25, obtuvo {dolar.conversion_clp}")
+            verificar(
+                timeouts_usados == [5, 10, 15, 20, 25, 30, 5],
+                f"Timeouts incorrectos: {timeouts_usados}",
             )
-        ]
+            ultima = dao.obtener_ultima()
+            verificar(
+                ultima is not None and ultima.conversion_clp == 951.25,
+                "No se guardó correctamente el fallback en la base de datos",
+            )
 
-        dolar = self.servicio.obtener_cotizacion()
+            print(f"\nDB temporal creada en: {carpeta_temp}")
+            input("Pausado para revisar en Finder. Presiona Enter para borrarla y continuar...")
+    finally:
+        requests.get = get_original
 
-        self.assertIsInstance(dolar, Dolar)
-        self.assertEqual(dolar.conversion_clp, 951.25)
-        self.assertEqual(
-            [llamada.kwargs["timeout"] for llamada in get.call_args_list],
-            [5, 10, 15, 20, 25, 30, 5],
-        )
-        self.assertEqual(self.dao.obtener_ultima().conversion_clp, 951.25)
 
-    @patch("services.dolar_service.requests.get")
-    def test_reutiliza_cotizacion_guardada_durante_el_dia(self, get):
-        self.dao.guardar(Dolar(date.today(), 1, 950))
+def test_reutiliza_cotizacion_guardada_durante_el_dia():
+    llamadas_api = 0
 
-        dolar = self.servicio.obtener_cotizacion()
+    def get_falso(url, params=None, timeout=None):
+        nonlocal llamadas_api
+        llamadas_api += 1
 
-        self.assertEqual(dolar.conversion_clp, 950)
-        get.assert_not_called()
+    get_original = requests.get
+    try:
+        requests.get = get_falso
+        with tempfile.TemporaryDirectory() as carpeta_temp:
+            ruta_db = os.path.join(carpeta_temp, "prueba.db")
+            dao = DolarDAO(ConexionDB(ruta_db))
+            servicio = DolarService(dao)
+
+            dao.guardar(Dolar(date.today(), 1, 950))
+            dolar = servicio.obtener_cotizacion()
+
+            verificar(dolar is not None and dolar.conversion_clp == 950, "No reutilizó el valor guardado de 950")
+            verificar(llamadas_api == 0, f"Se esperaba 0 llamadas a la API, pero hubo {llamadas_api}")
+    finally:
+        requests.get = get_original
 
 
 if __name__ == "__main__":
-    unittest.main()
+    test_normaliza_respuesta_principal()
+    test_reintenta_con_timeout_creciente_y_guarda_fallback()
+    test_reutiliza_cotizacion_guardada_durante_el_dia()
+    print("Todas las pruebas pasaron correctamente.")

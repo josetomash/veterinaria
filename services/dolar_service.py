@@ -18,25 +18,30 @@ class DolarService:
         
     # typehint tipo de retorno: -> Dolar | None
     def obtener_cotizacion(self) -> Dolar | None:
+        """
+        dolar es una cotización nueva, creada en ese instante con la respuesta de la API.
+
+        guardado es una cotización anterior, recuperada de la base de datos
+        (o None si la tabla está vacía).
+        """
         guardado = self._dolar_dao.obtener_ultima()
         # devolver el objeto ya guardado
         if guardado is not None and date.today() - guardado.timestamp < timedelta(days=1):
             return guardado
 
-        # en cada vuelta. toma una api distinta
-        # en orden. indice api que vale la primera 0
+        # en cada vuelta toma una api distinta
+        # en orden indice api que vale la primera 0
 
         """
                     ej de sintaxis
 
         for indice, valor in enumerate(lista):
             ...
-        
+    
                     en este caso el valor se desempaqueta en tres valores
 
-        for i, (fuente, url, parametros) in enumerate(self.APIS):
-            ...
-
+            for i, (fuente, url, parametros) in enumerate(self.APIS):
+                ...
         """
         for indice_api, (fuente, url, parametros) in enumerate(self.APIS):
             # la primera api se intenta hasta 6 veces
@@ -63,7 +68,7 @@ class DolarService:
                 try:
                     respuesta = requests.get(url, params=parametros, timeout=timeout)
                     if respuesta.status_code != 200:
-                        #. si es 200. ni se da la molestia de intentar otra vez
+                        # si es 200 ni se da la molestia de intentar otra vez
                         # simplemente lo rompe
                         break
                     try:
@@ -79,6 +84,7 @@ class DolarService:
                         # desde el model dolar que intento limpiar
                     except (TypeError, ValueError, OverflowError):
                         break
+                    # AQUI GUARDA DOLAR, LO CUAL LO CONVIERTE EN GUARDADO. (LA OTRA VAR)
                     self._dolar_dao.guardar(dolar)
                     return dolar
 
