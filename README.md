@@ -10,7 +10,7 @@ Se utilizo el siguiente prompt para realizar el boceto de como construir la API:
 En base al flujo actual de trabajo desde main -> screens -> models -> screens -> service -> dao
 Y en base a lo que tengo actualmente
 Realiza usando solo las APIs que tengo actualmente
-el flujo completo solo considerando actualmente como se estructura el proyecto
+el flujo completo solo considerando como se estructura el proyecto
 
 Restricciones e indicaciones:
 
@@ -19,7 +19,7 @@ Restricciones e indicaciones:
 3- Usa solo las librerias de requierments.txt 
 4- La primera API (url entregada aqui) es prioridad, tiene 5 intentos en vez de 1 para volver a consultar en un for
 5- Timeout de respuesta de 5 segundos para cada consulta de API
-6- Hace breaks si la consulta devuele un errore entre 2xx y 404
+6- Hace breaks si la consulta devuele un errores entre 2xx y 404
 7- Solo deja pasar si estan dentro del codigo que acepte un "OK" 
 8- En mi models implementa los setters y getters para detectar fallos numericos ajenos a fallos de conexion de la libreria requests
 9- En service y dao primero que consulte si ya existe un registro del resultado de la API
